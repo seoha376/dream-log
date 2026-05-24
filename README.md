@@ -1,208 +1,203 @@
-Dream Log Repository Setup Specification
-Version: Initial Setup
+# Dream Log
 
-========================================
-1. Repository Information
-========================================
+An intelligent personal dream journal application that helps users record, organize, and revisit dreams through date-based tracking, tagging, and AI-powered summarization.
 
-Repository Name:
-dream-log
+---
 
-Project Description:
-An intelligent personal dream journal application.
+## Team
 
-Repository Structure:
+- Song Seoha (Leader)
+- Eungyeol Kim
+- Mingyeong Kim
 
+---
+
+## Tech Stack
+
+### Frontend
+- React
+- Vite
+
+### Backend
+- Node.js
+- Express
+
+### Database
+- SQLite
+
+### Authentication
+- JWT
+- bcrypt
+
+### AI Integration
+- OpenAI API
+
+---
+
+## Project Structure
+
+```txt
 dream-log/
-
-├─ frontend/
-├─ backend/
-├─ docs/
-│   ├─ api/
-│   └─ db/
 │
-├─ README.md
-├─ .gitignore
-├─ .env.example
+├── frontend/
+│   └── src/
+│       ├── pages/
+│       │   ├── Login.jsx
+│       │   ├── Register.jsx
+│       │   ├── Dashboard.jsx
+│       │   ├── DreamCreate.jsx
+│       │   ├── DreamDetail.jsx
+│       │   └── Search.jsx
+│       │
+│       ├── components/
+│       ├── api/
+│       │   ├── authApi.js
+│       │   ├── dreamApi.js
+│       │   └── tagApi.js
+│       │
+│       ├── hooks/
+│       ├── context/
+│       └── styles/
+│
+├── backend/
+│   └── src/
+│       ├── routes/
+│       │   ├── authRoutes.js
+│       │   ├── dreamRoutes.js
+│       │   └── tagRoutes.js
+│       │
+│       ├── controllers/
+│       │   ├── authController.js
+│       │   ├── dreamController.js
+│       │   └── tagController.js
+│       │
+│       ├── middleware/
+│       │   └── authMiddleware.js
+│       │
+│       ├── db/
+│       │   └── database.js
+│       │
+│       ├── models/
+│       ├── utils/
+│       └── server.js
+│
+├── docs/
+│   ├── api/
+│   └── db/
+│
+├── .env.example
+├── .gitignore
+└── README.md
+```
 
-========================================
-2. Git Rules
-========================================
+---
 
-Main Branch:
-main
+## Run Project
 
-Recommended Feature Branch Format:
+### Frontend
 
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Runs on:
+
+```txt
+http://localhost:5173
+```
+
+### Backend
+
+```bash
+cd backend
+npm install
+npm run dev
+```
+
+Runs on:
+
+```txt
+http://localhost:3000
+```
+
+Health check:
+
+```txt
+GET /health
+```
+
+Example response:
+
+```json
+{
+  "success": true,
+  "message": "Dream Log API is running"
+}
+```
+
+---
+
+## Environment Variables
+
+Create a `.env` file based on `.env.example`
+
+```env
+PORT=3000
+JWT_SECRET=your_jwt_secret
+OPENAI_API_KEY=your_openai_api_key
+DATABASE_PATH=./src/db/dreamlog.sqlite
+```
+
+---
+
+## Git Workflow
+
+### Branch naming
+
+```txt
 feature/auth
 feature/dream
 feature/calendar
 feature/ui-login
 feature/ui-dashboard
 feature/ai-summary
+```
 
-PR Naming Rule:
+### Pull Request naming
 
+```txt
 [FE] Login UI
 [FE] Dashboard Layout
 [BE] Auth API
 [BE] Dream CRUD
+```
 
-Rules:
+### Rules
 
-- Do not push directly to main
-- Work on feature branches
-- Pull latest changes before starting
-- Merge through Pull Request
+- Do not push directly to `main`
+- Create a feature branch before working
+- Pull latest changes before starting work
+- Merge through Pull Requests
 
-========================================
-3. Frontend Setup
-========================================
+---
 
-Framework:
-React + Vite
+## Current Progress
 
-Run:
+### Completed
 
-cd frontend
-npm install
-npm run dev
+- Repository setup
+- Frontend initialization
+- Backend initialization
+- Basic folder structure
+- Environment configuration
+- Health check API
 
-Frontend Structure:
+### Next
 
-frontend/src/
-
-├─ pages/
-│   ├─ Login.jsx
-│   ├─ Register.jsx
-│   ├─ Dashboard.jsx
-│   ├─ DreamCreate.jsx
-│   ├─ DreamDetail.jsx
-│   └─ Search.jsx
-│
-├─ components/
-├─ api/
-│   ├─ authApi.js
-│   ├─ dreamApi.js
-│   └─ tagApi.js
-│
-├─ hooks/
-├─ context/
-└─ styles/
-
-========================================
-4. Backend Setup
-========================================
-
-Framework:
-Node.js + Express
-
-Installed Packages:
-
-Dependencies:
-
-express
-cors
-dotenv
-
-Dev Dependencies:
-
-nodemon
-
-Run:
-
-cd backend
-npm install
-npm run dev
-
-Backend Structure:
-
-backend/src/
-
-├─ routes/
-│   ├─ authRoutes.js
-│   ├─ dreamRoutes.js
-│   └─ tagRoutes.js
-│
-├─ controllers/
-│   ├─ authController.js
-│   ├─ dreamController.js
-│   └─ tagController.js
-│
-├─ middleware/
-│   └─ authMiddleware.js
-│
-├─ db/
-│   └─ database.js
-│
-├─ models/
-├─ utils/
-└─ server.js
-
-========================================
-5. Backend Health Check
-========================================
-
-Endpoint:
-
-GET /health
-
-Response:
-
-{
-  "success": true,
-  "message": "Dream Log API is running"
-}
-
-Test URL:
-
-http://localhost:3000/health
-
-========================================
-6. Environment Variables
-========================================
-
-.env.example
-
-PORT=3000
-JWT_SECRET=your_jwt_secret
-OPENAI_API_KEY=your_openai_api_key
-DATABASE_PATH=./src/db/dreamlog.sqlite
-
-========================================
-7. Git Ignore
-========================================
-
-Ignored:
-
-node_modules/
-.env
-.DS_Store
-dist/
-build/
-coverage/
-backend/database.sqlite
-backend/*.db
-
-========================================
-8. Current Milestone Status
-========================================
-
-Completed:
-
-[O] Repository created
-[O] Git initialized
-[O] Frontend project created
-[O] Backend project created
-[O] Basic folder structure created
-[O] .env.example created
-[O] README draft created
-[O] Health check API implemented
-
-Next:
-
-[ ] Database schema design
-[ ] API specification
-[ ] Authentication API
-[ ] Login/Register UI
-[ ] Dashboard UI
+- Database schema design
+- REST API specification
+- Authentication API
+- Login/Register UI
+- Dashboard UI
