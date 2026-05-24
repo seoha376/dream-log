@@ -1,6 +1,6 @@
 # Dream Log
 
-Dream Log is an intelligent personal dream journal web application.
+Dream Log is an intelligent personal dream journal application.
 
 ## Team
 
@@ -10,12 +10,38 @@ Dream Log is an intelligent personal dream journal web application.
 
 ## Tech Stack
 
-- Frontend: React
+- Frontend: React + Vite
 - Backend: Node.js + Express
 - Database: SQLite
-- Authentication: JWT + bcrypt
+- Auth: JWT + bcrypt
 - AI: OpenAI API
+
+## Project Structure
+
+```txt
+dream-log/
+├─ frontend/
+├─ backend/
+├─ docs/
+│  ├─ api/
+│  └─ db/
+├─ README.md
+├─ .gitignore
+└─ .env.example
 
 ## Run
 
-Instructions will be added later.
+# Run Frontend
+
+cd frontend
+npm install
+npm run dev
+
+# Run Backend
+
+cd backend
+npm install
+npm run dev
+
+# Backend Health Check
+GET http://localhost:3000/health
