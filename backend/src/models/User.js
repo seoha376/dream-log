@@ -2,7 +2,7 @@ const { run, get } = require("../db/dbHelper");
 
 const createUser = async (
   email,
-  passwordHash,
+  password_hash,
   username
 ) => {
   return await run(
@@ -11,7 +11,7 @@ const createUser = async (
     (email,password_hash,nickname)
     VALUES (?,?,?)
     `,
-    [email, passwordHash, username]
+    [email, password_hash, username]
   );
 };
 
