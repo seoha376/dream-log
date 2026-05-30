@@ -1,8 +1,8 @@
 const { run, get, all } = require("../db/dbHelper");
 
 const createDream = async (
-  userId,
-  dreamDate,
+  user_id,
+  dream_date,
   title,
   content
 ) => {
@@ -12,11 +12,11 @@ const createDream = async (
     (user_id,dream_date,title,content)
     VALUES (?,?,?,?)
     `,
-    [userId, dreamDate, title, content]
+    [user_id, dream_date, title, content]
   );
 };
 
-const findDreamsByUserId = async (userId) => {
+const findDreamsByUserId = async (user_id) => {
   return await all(
     `
     SELECT *
@@ -24,13 +24,13 @@ const findDreamsByUserId = async (userId) => {
     WHERE user_id=?
     ORDER BY dream_date DESC
     `,
-    [userId]
+    [user_id]
   );
 };
 
 const findDreamByIdAndUserId = async (
-  dreamId,
-  userId
+  dream_id,
+  user_id
 ) => {
   return await get(
     `
@@ -38,7 +38,7 @@ const findDreamByIdAndUserId = async (
     FROM dreams
     WHERE dream_id=? AND user_id=?
     `,
-    [dreamId, userId]
+    [dream_id, user_id]
   );
 };
 
