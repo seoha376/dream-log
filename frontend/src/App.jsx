@@ -8,6 +8,7 @@ import Dashboard from "./pages/Dashboard";
 import DreamDetail from "./pages/DreamDetail";
 import DreamCreate from "./pages/DreamCreate";
 import DreamEdit from "./pages/DreamEdit";
+import DreamList from "./pages/DreamList";
 
 
 
@@ -81,6 +82,7 @@ function Home() {
           The smartest way to capture, explore, and understand<br />
           the hidden patterns of your sleeping mind.
         </p>
+          <img src={logo} alt="Dream Log"  />
 
         <div className="card">
           <div className="card-header">
@@ -120,7 +122,9 @@ export default function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/dream/:id" element={<DreamDetail />} />
         <Route path="/dream/create" element={<DreamCreate />} />
-        <Route path="/dream/:id/edit" element={<DreamEdit />} />
+        <Route path="/dream/:id/edit" element={<DreamEdit />} />        
+        <Route path="/dreams" element={<DreamList />} />
+        
       </Routes>
     </BrowserRouter>
   );
