@@ -7,6 +7,9 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import DreamDetail from "./pages/DreamDetail";
 import DreamCreate from "./pages/DreamCreate";
+import DreamEdit from "./pages/DreamEdit";
+
+
 
 const stars = Array.from({ length: 60 }, (_, i) => ({
   id: i,
@@ -117,6 +120,7 @@ export default function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/dream/:id" element={<DreamDetail />} />
         <Route path="/dream/create" element={<DreamCreate />} />
+        <Route path="/dream/:id/edit" element={<DreamEdit />} />
       </Routes>
     </BrowserRouter>
   );

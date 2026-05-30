@@ -72,12 +72,12 @@ export default function Login() {
 
           <div className="auth-fields">
             <div className="field-group">
-              <label className="field-label">ID</label>
+              <label className="field-label">USERNAME/Email</label>
               <input
                 className="field-input"
                 type="text"
                 name="id"
-                placeholder="Enter your ID"
+                placeholder="Enter your Username or Email"
                 value={form.id}
                 onChange={handleChange}
                 onKeyDown={(e) => e.key === "Enter" && handleSubmit()}

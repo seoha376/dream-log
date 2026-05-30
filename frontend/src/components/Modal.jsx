@@ -23,14 +23,14 @@ export default function Modal({ open, type, message, onClose }) {
           )}
         </div>
 
-        <h3 className="modal-heading">{isSuccess ? "성공!" : "오류 발생"}</h3>
+        <h3 className="modal-heading">{isSuccess ? "Success" : "Error"}</h3>
         <p className="modal-message">{message}</p>
 
         <button
           className={`modal-btn ${isSuccess ? "modal-btn-success" : "modal-btn-error"}`}
           onClick={onClose}
         >
-          확인
+          Ok
         </button>
       </div>
     </div>

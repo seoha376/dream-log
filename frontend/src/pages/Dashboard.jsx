@@ -82,8 +82,8 @@ export default function Dashboard() {
           <img src={logo} alt="Dream Log" className="nav-logo-img" />
         </div>
         <div className="nav-actions">
-          <span className="nav-greeting">안녕하세요 👋</span>
-          <button className="btn-ghost" onClick={() => navigate("/")}>로그아웃</button>
+          <span className="nav-greeting">Welcome</span>
+          <button className="btn-ghost" onClick={() => navigate("/")}>Logout</button>
         </div>
       </nav>
 

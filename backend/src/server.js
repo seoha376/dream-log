@@ -1,6 +1,7 @@
 require("dotenv").config();
 
 const express = require("express");
+const cors = require("cors");        // ← 추가
 const db = require("./db/database");
 const initDb = require("./db/initDb");
 const authRoutes = require("./routes/authRoutes");
@@ -8,6 +9,7 @@ const authMiddleware = require("./middleware/authMiddleware");
 
 const app = express();
 
+app.use(cors({ origin: "http://localhost:5173" }));  // ← 추가
 app.use(express.json());
 
 app.get("/health", (req, res) => {
