@@ -1,8 +1,8 @@
 const { run, all } = require("../db/dbHelper");
 
 const addTagToDream = async (
-  dreamId,
-  tagId
+  dream_id,
+  tag_id
 ) => {
   return await run(
     `
@@ -10,12 +10,12 @@ const addTagToDream = async (
     (dream_id,tag_id)
     VALUES (?,?)
     `,
-    [dreamId, tagId]
+    [dream_id, tag_id]
   );
 };
 
 const findTagsByDreamId = async (
-  dreamId
+  dream_id
 ) => {
   return await all(
     `
@@ -25,7 +25,7 @@ const findTagsByDreamId = async (
     ON t.tag_id=dt.tag_id
     WHERE dt.dream_id=?
     `,
-    [dreamId]
+    [dream_id]
   );
 };
 

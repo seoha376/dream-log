@@ -2,16 +2,16 @@ const { run, get } = require("../db/dbHelper");
 
 const createUser = async (
   email,
-  passwordHash,
-  nickname
+  password_hash,
+  username
 ) => {
   return await run(
     `
     INSERT INTO users
-    (email,password_hash,nickname)
+    (email,password_hash,username)
     VALUES (?,?,?)
     `,
-    [email, passwordHash, nickname]
+    [email, password_hash, username]
   );
 };
 
@@ -26,19 +26,27 @@ const findUserByEmail = async (email) => {
   );
 };
 
-const findUserById = async (userId) => {
+const findUserById = async (id) => {
   return await get(
     `
-    SELECT user_id,email,nickname,created_at
+    SELECT user_id,email,username,created_at
     FROM users
     WHERE user_id=?
     `,
-    [userId]
+    [id]
+  );
+};
+
+const findUserByUsername = async (username) => {
+  return await get(
+    `SELECT * FROM users WHERE username = ?`,
+    [username]
   );
 };
 
 module.exports = {
   createUser,
   findUserByEmail,
-  findUserById
+  findUserById,
+  findUserByUsername  // ← 추가
 };

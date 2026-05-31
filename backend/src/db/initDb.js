@@ -7,7 +7,7 @@ const initDb = () => {
         user_id INTEGER PRIMARY KEY AUTOINCREMENT,
         email TEXT NOT NULL UNIQUE,
         password_hash TEXT NOT NULL,
-        nickname TEXT NOT NULL,
+        username TEXT NOT NULL,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )
     `);
