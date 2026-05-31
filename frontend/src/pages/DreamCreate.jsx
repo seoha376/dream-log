@@ -2,6 +2,9 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import logo from "../assets/logo.png";
 import { dreamTags } from "../data/tags";
+import { createDream } from "../api/dreamApi";  // ← 추가
+import Modal from "../components/Modal"; 
+
 
 export default function DreamCreate() {
   const navigate = useNavigate();
@@ -11,6 +14,10 @@ export default function DreamCreate() {
     dream_date: "",
     tags: [],
   });
+
+  
+const [modal, setModal] = useState({ open: false, type: "", message: "" });
+const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -24,12 +31,26 @@ export default function DreamCreate() {
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Form submitted:", form);
-    navigate("/dreams");
-  };
-
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  try {
+    await createDream(form);
+    setModal({ open: true, type: "success", message: "Dream saved! 🌙" });
+  } catch (err) {
+    setModal({
+      open: true,
+      type: "error",
+      message: err?.response?.data?.message || "Failed to save dream.",
+    });
+  } finally {
+    setLoading(false);
+  }
+};
+const handleModalClose = () => {
+  setModal((prev) => ({ ...prev, open: false }));
+  if (modal.type === "success") navigate("/dreams");
+};
   return (
     <div className="root">
       {/* Starfield */}
@@ -129,12 +150,18 @@ export default function DreamCreate() {
             </div>
 
             {/* Submit */}
-            <button type="submit" className="btn-primary">
-              Save Dream ✦
-            </button>
+<button type="submit" className="btn-primary" disabled={loading}>
+  {loading ? "Saving..." : "Save Dream ✦"}
+</button>
 
           </form>
         </div>
+        <Modal
+  open={modal.open}
+  type={modal.type}
+  message={modal.message}
+  onClose={handleModalClose}
+/>
       </main>
     </div>
   );
