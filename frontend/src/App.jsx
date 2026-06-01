@@ -1,122 +1,131 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState, useEffect } from "react";
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
+import "./App.css";
+import logo from "./assets/logo.png";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Dashboard from "./pages/Dashboard";
+import DreamDetail from "./pages/DreamDetail";
+import DreamCreate from "./pages/DreamCreate";
+import DreamEdit from "./pages/DreamEdit";
+import DreamList from "./pages/DreamList";
 
-function App() {
-  const [count, setCount] = useState(0)
+
+
+const stars = Array.from({ length: 60 }, (_, i) => ({
+  id: i,
+  x: Math.random() * 100,
+  y: Math.random() * 100,
+  size: Math.random() * 2.5 + 0.5,
+  delay: Math.random() * 4,
+  duration: Math.random() * 3 + 2,
+}));
+
+function Home() {
+  const navigate = useNavigate();
+  const [mounted, setMounted] = useState(false);
+  const [inputText, setInputText] = useState("");
+  const placeholder = "I was flying over a misty city when suddenly...";
+
+  useEffect(() => {
+    setMounted(true);
+    let i = 0;
+    const interval = setInterval(() => {
+      if (i <= placeholder.length) {
+        setInputText(placeholder.slice(0, i));
+        i++;
+      } else {
+        clearInterval(interval);
+      }
+    }, 40);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="root">
+      <div className="starfield" aria-hidden="true">
+        {stars.map((s) => (
+          <span
+            key={s.id}
+            className="star"
+            style={{
+              left: `${s.x}%`,
+              top: `${s.y}%`,
+              width: s.size,
+              height: s.size,
+              animationDelay: `${s.delay}s`,
+              animationDuration: `${s.duration}s`,
+            }}
+          />
+        ))}
+      </div>
 
-      <div className="ticks"></div>
+      <div className="aurora" aria-hidden="true" />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+      <nav className="nav">
+        <div className="nav-logo">
+          <img src={logo} alt="Dream Log" className="nav-logo-img" />
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
+        <div className="nav-actions">
+          <button className="btn-ghost" onClick={() => navigate("/login")}>Log In</button>
+          <button className="btn-orange" onClick={() => navigate("/register")}>Sign Up</button>
         </div>
-      </section>
+      </nav>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      <main className={`hero ${mounted ? "mounted" : ""}`}>
+        <p className="eyebrow">✦ Your subconscious, archived</p>
+        <h1 className="headline">
+          Don't let your<br />
+          <span className="headline-accent">dreams fade.</span>
+        </h1>
+        <p className="subline">
+          The smartest way to capture, explore, and understand<br />
+          the hidden patterns of your sleeping mind.
+        </p>
+          <img src={logo} alt="Dream Log"  />
+
+        <div className="card">
+          <div className="card-header">
+            <span className="card-dot red" />
+            <span className="card-dot yellow" />
+            <span className="card-label">Tonight's dream</span>
+          </div>
+          <textarea
+            className="textarea"
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            rows={4}
+          />
+          <div className="card-footer">
+            <span className="char-count">{inputText.length} characters</span>
+            <button className="btn-save">Save Dream ✦</button>
+          </div>
+        </div>
+
+        <div className="pills">
+          {["🔍 AI Analysis", "📅 Dream Calendar", "🏷️ Tag & Search", "📊 Pattern Reports"].map((f) => (
+            <span key={f} className="pill">{f}</span>
+          ))}
+        </div>
+      </main>
+    </div>
+  );
 }
 
-export default App
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/dream/:id" element={<DreamDetail />} />
+        <Route path="/dream/create" element={<DreamCreate />} />
+        <Route path="/dream/:id/edit" element={<DreamEdit />} />        
+        <Route path="/dreams" element={<DreamList />} />
+        
+      </Routes>
+    </BrowserRouter>
+  );
+}

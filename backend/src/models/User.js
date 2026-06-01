@@ -8,7 +8,7 @@ const createUser = async (
   return await run(
     `
     INSERT INTO users
-    (email,password_hash,nickname)
+    (email,password_hash,username)
     VALUES (?,?,?)
     `,
     [email, password_hash, username]
@@ -37,8 +37,16 @@ const findUserById = async (id) => {
   );
 };
 
+const findUserByUsername = async (username) => {
+  return await get(
+    `SELECT * FROM users WHERE username = ?`,
+    [username]
+  );
+};
+
 module.exports = {
   createUser,
   findUserByEmail,
-  findUserById
+  findUserById,
+  findUserByUsername  // ← 추가
 };

@@ -1,23 +1,39 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import logo from "../assets/logo.png";
+import { mockDreams } from "../data/mockDreams";
 import { dreamTags } from "../data/tags";
-import { createDream } from "../api/dreamApi";  // ← 추가
-import Modal from "../components/Modal"; 
 
-
-export default function DreamCreate() {
+export default function DreamEdit() {
+  const { id } = useParams();
   const navigate = useNavigate();
+  const dream = mockDreams.find((d) => d.dream_id === Number(id));
+
   const [form, setForm] = useState({
-    title: "",
-    content: "",
-    dream_date: "",
-    tags: [],
+    title: dream?.title || "",
+    content: dream?.content || "",
+    dream_date: dream?.dream_date || "",
+    tags: dream?.tags || [],
   });
 
-  
-const [modal, setModal] = useState({ open: false, type: "", message: "" });
-const [loading, setLoading] = useState(false);
+  if (!dream) {
+    return (
+      <div className="root">
+        <div className="aurora" aria-hidden="true" />
+        <nav className="nav">
+          <Link to="/dashboard" className="nav-logo">
+            <img src={logo} alt="Dream Log" className="nav-logo-img" />
+          </Link>
+        </nav>
+        <main className="dream-detail-main">
+          <div className="dream-detail-card">
+            <p className="dream-detail-empty">Dream not found.</p>
+            <button className="btn-ghost" onClick={() => navigate("/dashboard")}>← Back</button>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -31,26 +47,13 @@ const [loading, setLoading] = useState(false);
     }
   };
 
-  const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
-  try {
-    await createDream(form);
-    setModal({ open: true, type: "success", message: "Dream saved! 🌙" });
-  } catch (err) {
-    setModal({
-      open: true,
-      type: "error",
-      message: err?.response?.data?.message || "Failed to save dream.",
-    });
-  } finally {
-    setLoading(false);
-  }
-};
-const handleModalClose = () => {
-  setModal((prev) => ({ ...prev, open: false }));
-  if (modal.type === "success") navigate("/dreams");
-};
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log("Updated dream:", form);
+    // TODO: API 연결 후 실제 수정 요청
+    navigate(`/dream/${id}`);
+  };
+
   return (
     <div className="root">
       {/* Starfield */}
@@ -78,8 +81,8 @@ const handleModalClose = () => {
           <img src={logo} alt="Dream Log" className="nav-logo-img" />
         </Link>
         <div className="nav-actions">
-          <button className="btn-ghost" onClick={() => navigate("/dashboard")}>
-            ← Back
+          <button className="btn-ghost" onClick={() => navigate(`/dream/${id}`)}>
+            ← Cancel
           </button>
         </div>
       </nav>
@@ -87,12 +90,12 @@ const handleModalClose = () => {
       {/* Main */}
       <main className="dream-create-main">
         <div className="dream-create-card">
-          <h2 className="dream-create-title">New Dream</h2>
-          <p className="dream-create-subtitle">Record what you dreamed tonight</p>
+          <h2 className="dream-create-title">Edit Dream</h2>
+          <p className="dream-create-subtitle">Update your dream record</p>
 
           <form onSubmit={handleSubmit} className="dream-create-form">
 
-            {/* Title + Date 한 줄 */}
+            {/* Title + Date */}
             <div className="field-row">
               <div className="field-group" style={{ flex: 2 }}>
                 <label className="field-label">TITLE</label>
@@ -149,19 +152,22 @@ const handleModalClose = () => {
               </div>
             </div>
 
-            {/* Submit */}
-<button type="submit" className="btn-primary" disabled={loading}>
-  {loading ? "Saving..." : "Save Dream ✦"}
-</button>
+            {/* Buttons */}
+            <div className="dream-edit-actions">
+              <button
+                type="button"
+                className="btn-ghost"
+                onClick={() => navigate(`/dream/${id}`)}
+              >
+                Cancel
+              </button>
+              <button type="submit" className="btn-primary dream-edit-save">
+                Save Changes ✦
+              </button>
+            </div>
 
           </form>
         </div>
-        <Modal
-  open={modal.open}
-  type={modal.type}
-  message={modal.message}
-  onClose={handleModalClose}
-/>
       </main>
     </div>
   );
