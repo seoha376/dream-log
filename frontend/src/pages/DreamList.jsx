@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import logo from "../assets/logo.png";
-import { mockDreams } from "../data/mockDreams";
+import { getDreams, deleteDream } from "../api/dreamApi";
 import { dreamTags } from "../data/tags";
 
 export default function DreamList() {
@@ -9,6 +9,21 @@ export default function DreamList() {
   const [search, setSearch] = useState("");
   const [selectedTags, setSelectedTags] = useState([]);
   const [showTagFilter, setShowTagFilter] = useState(false);
+  const [dreams, setDreams] = useState([]);
+
+  
+  const loadDreams = async () => {
+    try {
+      const res = await getDreams();
+      setDreams(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    loadDreams();
+  }, []);
 
   const handleTagToggle = (tag) => {
     if (selectedTags.includes(tag)) {
@@ -18,7 +33,7 @@ export default function DreamList() {
     }
   };
 
-  const filtered = mockDreams.filter((dream) => {
+  const filtered = dreams.filter((dream) => {
     const matchSearch =
       search === "" ||
       dream.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -26,10 +41,22 @@ export default function DreamList() {
 
     const matchTags =
       selectedTags.length === 0 ||
-      selectedTags.every((tag) => dream.tags.includes(tag));
+      selectedTags.every((tag) => dream.tags?.includes(tag));
 
     return matchSearch && matchTags;
   });
+
+  const handleDelete = async (dreamId) => {
+    try {
+      await deleteDream(dreamId);
+      alert("Deleted dream successfully");
+
+      const res = await getDreams();
+      setDreams(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   return (
     <div className="root">
@@ -185,7 +212,7 @@ export default function DreamList() {
                     <span className="dreamlist-action-sep">/</span>
                     <button
                       className="dreamlist-action-btn dreamlist-action-delete"
-                      onClick={() => console.log("delete", dream.dream_id)}
+                      onClick={() => handleDelete(dream.dream_id)}
                     >
                       Delete
                     </button>

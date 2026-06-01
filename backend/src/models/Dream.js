@@ -1,11 +1,6 @@
 const { run, get, all } = require("../db/dbHelper");
 
-const createDream = async (
-  user_id,
-  dream_date,
-  title,
-  content
-) => {
+const createDream = async (user_id,dream_date,title,content) => {
   return await run(
     `
     INSERT INTO dreams
@@ -28,10 +23,7 @@ const findDreamsByUserId = async (user_id) => {
   );
 };
 
-const findDreamByIdAndUserId = async (
-  dream_id,
-  user_id
-) => {
+const findDreamByIdAndUserId = async (dream_id,user_id) => {
   return await get(
     `
     SELECT *
@@ -42,8 +34,31 @@ const findDreamByIdAndUserId = async (
   );
 };
 
+const updateDream = async (dream_id, user_id, title, content, dream_date) => {
+  return await run(
+    `
+    UPDATE dreams
+    SET title = ?, content = ?, dream_date = ?
+    WHERE dream_id = ? AND user_id = ?
+    `,
+    [title, content, dream_date, dream_id, user_id]
+  );
+};
+
+const deleteDream = async (dream_id, user_id) => {
+  return await run(
+    `
+    DELETE FROM dreams
+    WHERE dream_id = ? AND user_id = ?
+    `,
+    [dream_id, user_id]
+  );
+};
+
 module.exports = {
   createDream,
   findDreamsByUserId,
-  findDreamByIdAndUserId
+  findDreamByIdAndUserId,
+  updateDream,
+  deleteDream
 };

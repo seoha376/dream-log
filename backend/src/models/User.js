@@ -26,14 +26,14 @@ const findUserByEmail = async (email) => {
   );
 };
 
-const findUserById = async (id) => {
+const findUserById = async (user_id) => {
   return await get(
     `
     SELECT user_id,email,username,created_at
     FROM users
     WHERE user_id=?
     `,
-    [id]
+    [user_id]
   );
 };
 

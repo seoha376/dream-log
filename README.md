@@ -119,7 +119,7 @@ npm run dev
 Runs on:
 
 ```txt
-http://localhost:3000
+http://localhost:5000
 ```
 
 Health check:

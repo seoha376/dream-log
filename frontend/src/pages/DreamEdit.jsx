@@ -1,43 +1,100 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import logo from "../assets/logo.png";
-import { mockDreams } from "../data/mockDreams";
 import { dreamTags } from "../data/tags";
+import { getDream, updateDream } from "../api/dreamApi";
 
 export default function DreamEdit() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const dream = mockDreams.find((d) => d.dream_id === Number(id));
+  const [dream, setDream] = useState(null);
 
   const [form, setForm] = useState({
-    title: dream?.title || "",
-    content: dream?.content || "",
-    dream_date: dream?.dream_date || "",
-    tags: dream?.tags || [],
-  });
+  title: "",
+  content: "",
+  dream_date: "",
+  tags: [],
+});
 
-  if (!dream) {
-    return (
-      <div className="root">
-        <div className="aurora" aria-hidden="true" />
-        <nav className="nav">
-          <Link to="/dashboard" className="nav-logo">
-            <img src={logo} alt="Dream Log" className="nav-logo-img" />
-          </Link>
-        </nav>
-        <main className="dream-detail-main">
-          <div className="dream-detail-card">
-            <p className="dream-detail-empty">Dream not found.</p>
-            <button className="btn-ghost" onClick={() => navigate("/dashboard")}>← Back</button>
-          </div>
-        </main>
-      </div>
-    );
+const [loading, setLoading] = useState(true);
+const [notFound, setNotFound] = useState(false);
+
+
+useEffect(() => {
+  async function loadDream() {
+    try {
+      const response = await getDream(id);
+      const dreamData = response.data;
+
+      setForm({
+        title: dreamData.title || "",
+        content: dreamData.content || "",
+        dream_date: dreamData.dream_date
+        ? dreamData.dream_date.slice(0, 10) 
+        : "",
+        tags: dreamData.tags || [],
+      });
+    } catch (err) {
+      console.error(err);
+      setNotFound(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  loadDream();
+}, [id]);
+
+  // if (!dream) {
+  //   return (
+  //     <div className="root">
+  //       <div className="aurora" aria-hidden="true" />
+  //       <nav className="nav">
+  //         <Link to="/dashboard" className="nav-logo">
+  //           <img src={logo} alt="Dream Log" className="nav-logo-img" />
+  //         </Link>
+  //       </nav>
+  //       <main className="dream-detail-main">
+  //         <div className="dream-detail-card">
+  //           <p className="dream-detail-empty">Dream not found.</p>
+  //           <button className="btn-ghost" onClick={() => navigate("/dashboard")}>← Back</button>
+  //         </div>
+  //       </main>
+  //     </div>
+  //   );
+  // }
+
+if (loading) {
+  return (
+    <div className="root">
+      <main className="dream-detail-main">
+        <div className="dream-detail-card">
+          <p>Loading...</p>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+if (notFound) {
+  return (
+    <div className="root">
+      <main className="dream-detail-main">
+        <div className="dream-detail-card">
+          <p className="dream-detail-empty">Dream not found.</p>
+          <button
+            className="btn-ghost"
+            onClick={() => navigate("/dashboard")}
+          >
+            ← Back
+          </button>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+
 
   const handleTagToggle = (tag) => {
     if (form.tags.includes(tag)) {
@@ -47,12 +104,34 @@ export default function DreamEdit() {
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Updated dream:", form);
-    // TODO: API 연결 후 실제 수정 요청
-    navigate(`/dream/${id}`);
+
+    const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
+
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  try {
+    await updateDream(id, {
+      title: form.title,
+      content: form.content,
+      dream_date: form.dream_date,
+    });
+
+    navigate(`/dream/${id}`);
+  } catch (err) {
+    console.error(err);
+    alert("Failed to update dream.");
+  }
+};
+
+  // const handleSubmit = (e) => {
+  //   e.preventDefault();
+  //   console.log("Updated dream:", form);
+  //   // TODO: API 연결 후 실제 수정 요청
+  //   navigate(`/dream/${id}`);
+  // };
 
   return (
     <div className="root">

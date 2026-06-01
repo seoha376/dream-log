@@ -1,11 +1,33 @@
+import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import logo from "../assets/logo.png";
-import { mockDreams } from "../data/mockDreams";
+import { getDream } from "../api/dreamApi";
 
 export default function DreamDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const dream = mockDreams.find((d) => d.dream_id === Number(id));
+  const [dream, setDream] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadDream = async () => {
+      try {
+        const res = await getDream(id);
+        setDream(res.data);
+      } catch (err) {
+        console.error(err);
+        setDream(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDream();
+  }, [id]);
+
+  if (loading) {
+    return <div className="root">Loading...</div>;
+  }
 
   if (!dream) {
     return (
