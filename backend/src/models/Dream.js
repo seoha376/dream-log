@@ -98,6 +98,19 @@ const removeTagsFromDream = async (dream_id) => {
   );
 };
 
+const findDreamsByUserIdAndKeyword = async (user_id, keyword) => {
+  return await all(
+    `
+    SELECT *
+    FROM dreams
+    WHERE user_id = ?
+      AND (title LIKE ? OR content LIKE ?)
+    ORDER BY dream_date DESC
+    `,
+    [user_id, `%${keyword}%`, `%${keyword}%`]
+  );
+};
+
 const findDreamsByUserIdAndTagId = async (user_id, tag_id) => {
   return await all(
     `
@@ -122,7 +135,8 @@ module.exports = {
   findTagById,
   addTagToDream,
   removeTagsFromDream,
-  findDreamsByUserIdAndTagId
+  findDreamsByUserIdAndTagId,
+  findDreamsByUserIdAndKeyword
 };
 
 

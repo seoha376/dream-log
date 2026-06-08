@@ -9,17 +9,33 @@ router.use(authMiddleware);
  * @swagger
  * /api/dreams:
  *   get:
- *     summary: Get all dreams for logged-in user
- *     tags: [Dreams]
+ *     summary: Get dreams
+ *     description: Get dreams for the logged-in user. Can filter by tag or keyword.
+ *     tags:
+ *       - Dreams
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: tag
+ *         schema:
+ *           type: integer
+ *         required: false
+ *         description: Filter dreams by tag_id
+ *       - in: query
+ *         name: keyword
+ *         schema:
+ *           type: string
+ *         required: false
+ *         description: Search dreams by title or content
  *     responses:
  *       200:
- *         description: Dream list returned successfully
+ *         description: Dreams fetched successfully
  *       401:
  *         description: Authorization token is required
+ *       500:
+ *         description: Failed to get dreams
  */
-
 router.get("/", dreamController.getDreams);
 
 

@@ -3,12 +3,17 @@ const Dream = require("../models/Dream");
 exports.getDreams = async (req, res) => {
   try {
     const userId = req.user.user_id;
-    const tag = req.query.tag;
+    const { tag, keyword } = req.query;
 
-    const dreams = tag
-      ? await Dream.findDreamsByUserIdAndTagId(userId, tag)
-      : await Dream.findDreamsByUserId(userId);
+    let dreams;
 
+    if (tag) {
+      dreams = await Dream.findDreamsByUserIdAndTagId(userId, tag);
+    } else if (keyword) {
+      dreams = await Dream.findDreamsByUserIdAndKeyword(userId, keyword);
+    } else {
+      dreams = await Dream.findDreamsByUserId(userId);
+    }
     res.json(dreams);
   } catch (err) {
     console.error("GET DREAMS ERROR:", err.message);
