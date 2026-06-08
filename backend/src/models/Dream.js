@@ -55,6 +55,18 @@ const deleteDream = async (dream_id, user_id) => {
   );
 };
 
+
+const updateFavorite = async (dream_id, user_id, is_favorite) => {
+  return await run(
+    `
+    UPDATE dreams
+    SET is_favorite = ?, updated_at = CURRENT_TIMESTAMP
+    WHERE dream_id = ? AND user_id = ?
+    `,
+    [is_favorite, dream_id, user_id]
+  );
+};
+
 module.exports = {
   createDream,
   findDreamsByUserId,
