@@ -1,10 +1,13 @@
 const Dream = require("../models/Dream");
 
-exports.getDreams = async(req, res) => {
-
+exports.getDreams = async (req, res) => {
   try {
     const userId = req.user.user_id;
-    const dreams = await Dream.findDreamsByUserId(userId);
+    const tag = req.query.tag;
+
+    const dreams = tag
+      ? await Dream.findDreamsByUserIdAndTagId(userId, tag)
+      : await Dream.findDreamsByUserId(userId);
 
     res.json(dreams);
   } catch (err) {
@@ -16,12 +19,11 @@ exports.getDreams = async(req, res) => {
   }
 };
 
-
 exports.getDream = async (req, res) => {
-  const userId = req.user.user_id;
-  const dreamId = req.params.id;
-
   try {
+    const userId = req.user.user_id;
+    const dreamId = req.params.id;
+
     const dream = await Dream.findDreamByIdAndUserId(dreamId, userId);
 
     if (!dream) {
@@ -30,7 +32,7 @@ exports.getDream = async (req, res) => {
         message: "Dream not found"
       });
     }
-    
+
     res.json(dream);
   } catch (err) {
     console.error("GET DREAM ERROR:", err.message);
@@ -41,29 +43,48 @@ exports.getDream = async (req, res) => {
   }
 };
 
-
-
-
 exports.createDream = async (req, res) => {
   try {
-  const userId = req.user.user_id;
-  const { title, content, dream_date } = req.body;
+    const userId = req.user.user_id;
+    const { title, content, dream_date, tags = [] } = req.body;
 
-  if (!title || !content || !dream_date) {
-    return res.status(400).json({
-      code: "MISSING_REQUIRED_FIELDS",
-      message: "title, content, dream_date are required"
-    });
-  }
+    if (!title || !content || !dream_date) {
+      return res.status(400).json({
+        code: "MISSING_REQUIRED_FIELDS",
+        message: "title, content, dream_date are required"
+      });
+    }
 
-  const result = await Dream.createDream(userId, dream_date, title, content);
+    if (!Array.isArray(tags)) {
+      return res.status(400).json({
+        code: "INVALID_TAGS",
+        message: "tags must be an array"
+      });
+    }
+
+    const result = await Dream.createDream(userId, dream_date, title, content);
+    const dreamId = result.id;
+
+    for (const tagId of tags) {
+      const tag = await Dream.findTagById(tagId);
+
+      if (!tag) {
+        return res.status(400).json({
+          code: "INVALID_TAG_ID",
+          message: `Invalid tag_id: ${tagId}`
+        });
+      }
+
+      await Dream.addTagToDream(dreamId, tagId);
+    }
 
     res.status(201).json({
-      dream_id: result.lastID,
+      dream_id: dreamId,
       user_id: userId,
       title,
       content,
       dream_date,
+      tags
     });
   } catch (err) {
     console.error("CREATE DREAM ERROR:", err.message);
@@ -82,7 +103,7 @@ exports.updateDream = async (req, res) => {
   try {
     const userId = req.user.user_id;
     const dreamId = req.params.id;
-    const { title, content, dream_date } = req.body;
+    const { title, content, dream_date, tags } = req.body;
 
     const existingDream = await Dream.findDreamByIdAndUserId(dreamId, userId);
 
@@ -97,7 +118,25 @@ exports.updateDream = async (req, res) => {
     const nextContent = content ?? existingDream.content;
     const nextDate = dream_date ?? existingDream.dream_date;
 
-    await Dream.updateDream(dreamId, userId, nextTitle, nextContent, nextDate);
+    await Dream.updateDream
+    (dreamId, userId, nextTitle, nextContent, nextDate);
+
+    if (Array.isArray(tags)) {
+      await Dream.removeTagsFromDream(dreamId);
+
+      for (const tagId of tags) {
+        const tag = await Dream.findTagById(tagId);
+      
+        if (!tag) {
+          return res.status(400).json({
+            code: "INVALID_TAG_ID",
+            message: `Invalid tag_id: ${tagId}`
+          });
+        }
+      
+        await Dream.addTagToDream(dreamId, tagId);
+      }
+    }
 
     res.json({
       dream_id: Number(dreamId),

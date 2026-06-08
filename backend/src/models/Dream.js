@@ -67,10 +67,63 @@ const updateFavorite = async (dream_id, user_id, is_favorite) => {
   );
 };
 
+const findTagById = async (tag_id) => {
+  return await get(
+    `
+    SELECT *
+    FROM tags
+    WHERE tag_id = ?
+    `,
+    [tag_id]
+  );
+};
+
+const addTagToDream = async (dream_id, tag_id) => {
+  return await run(
+    `
+    INSERT OR IGNORE INTO dream_tags (dream_id, tag_id)
+    VALUES (?, ?)
+    `,
+    [dream_id, tag_id]
+  );
+};
+
+const removeTagsFromDream = async (dream_id) => {
+  return await run(
+    `
+    DELETE FROM dream_tags
+    WHERE dream_id = ?
+    `,
+    [dream_id]
+  );
+};
+
+const findDreamsByUserIdAndTagId = async (user_id, tag_id) => {
+  return await all(
+    `
+    SELECT d.*
+    FROM dreams d
+    JOIN dream_tags dt ON d.dream_id = dt.dream_id
+    WHERE d.user_id = ? AND dt.tag_id = ?
+    ORDER BY d.dream_date DESC
+    `,
+    [user_id, tag_id]
+  );
+};
+
+
 module.exports = {
   createDream,
   findDreamsByUserId,
   findDreamByIdAndUserId,
   updateDream,
-  deleteDream
+  deleteDream,
+  updateFavorite,
+  findTagById,
+  addTagToDream,
+  removeTagsFromDream,
+  findDreamsByUserIdAndTagId
 };
+
+
+
