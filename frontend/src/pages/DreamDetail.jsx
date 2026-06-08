@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import logo from "../assets/logo.png";
-import { getDream } from "../api/dreamApi";
+import { getDream, toggleFavorite } from "../api/dreamApi";
 
 export default function DreamDetail() {
   const { id } = useParams();
@@ -22,8 +22,19 @@ export default function DreamDetail() {
       }
     };
 
+    
     loadDream();
   }, [id]);
+
+  const handleToggleFavorite = async () => {
+    try {
+      await toggleFavorite(id);
+      setDream((prev) => ({ ...prev, is_favorite: !prev.is_favorite }));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
 
   if (loading) {
     return <div className="root">Loading...</div>;
@@ -90,9 +101,12 @@ export default function DreamDetail() {
               <h1 className="dream-detail-title">{dream.title}</h1>
               <span className="dream-detail-date">📅 {dream.dream_date}</span>
             </div>
-            <span className={`dream-detail-fav ${dream.is_favorite ? "fav-active" : ""}`}>
+            <button
+              className={`dream-detail-fav ${dream.is_favorite ? "fav-active" : ""}`}
+              onClick={handleToggleFavorite}
+            >
               {dream.is_favorite ? "★ Favorited" : "☆ Not favorited"}
-            </span>
+            </button>
           </div>
 
           {/* Tags */}
