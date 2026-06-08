@@ -201,3 +201,93 @@ feature/ai-summary
 - Authentication API
 - Login/Register UI
 - Dashboard UI
+
+
+## API Documentation
+
+Swagger UI is available at:
+
+```txt
+http://localhost:5000/api/docs
+```
+
+---
+
+## Testing
+
+The backend test suite is implemented using **Jest** and **Supertest**.
+
+### Test Coverage
+#### Unit Tests
+
+* authMiddleware
+* response utility
+
+#### API Tests
+
+* User registration
+* User login
+* Protected route authentication
+* Dream creation
+* Dream retrieval
+* Error handling
+
+#### Error Cases Covered
+
+* 400 Bad Request
+* 401 Unauthorized
+* 404 Not Found
+
+### Run Tests
+
+```bash
+cd backend
+npm test
+```
+
+Example output:
+
+```txt
+PASS tests/unit/authMiddleware.test.js
+PASS tests/unit/response.test.js
+PASS tests/api/auth.test.js
+PASS tests/api/protected.test.js
+PASS tests/api/dream.test.js
+
+Test Suites: 5 passed, 5 total
+Tests: 14 passed, 14 total
+```
+
+---
+
+## Continuous Integration
+
+GitHub Actions automatically runs the backend test suite on every push and pull request.
+
+Workflow file:
+
+```txt
+.github/workflows/test.yml
+```
+
+The workflow performs:
+
+* Dependency installation
+* Jest test execution
+* API integration test execution
+* CI validation before merge
+
+---
+
+## AI Use Disclosure
+
+AI assistance (ChatGPT) was used during development for:
+
+* Code review
+* Debugging support
+* Test planning
+* API documentation assistance
+* CI/CD workflow setup
+* README drafting
+
+All generated code and documentation were reviewed, tested, modified, and understood by the project team before submission.
