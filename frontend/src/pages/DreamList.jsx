@@ -10,14 +10,18 @@ export default function DreamList() {
   const [selectedTags, setSelectedTags] = useState([]);
   const [showTagFilter, setShowTagFilter] = useState(false);
   const [dreams, setDreams] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  
+
   const loadDreams = async () => {
+    setLoading(true);
     try {
       const res = await getDreams();
       setDreams(res.data);
     } catch (err) {
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -169,7 +173,11 @@ export default function DreamList() {
           <div className="dreamlist-divider" />
 
           {/* Dream list */}
-          {filtered.length === 0 ? (
+          {loading ? (
+            <div className="dreamlist-empty">
+              <p>Loading dreams...</p>
+            </div>
+          ) : filtered.length === 0 ? (
             <div className="dreamlist-empty">
               <p>No dreams found.</p>
               <button className="btn-primary" style={{ width: "auto", marginTop: 16 }} onClick={() => navigate("/dream/create")}>
