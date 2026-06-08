@@ -185,4 +185,41 @@ router.delete("/:id", dreamController.deleteDream);
  */
 router.patch("/:id/favorite", dreamController.toggleFavorite);
 
+/**
+ * @swagger
+ * /api/dreams/{id}/summary:
+ *   post:
+ *     summary: Generate AI summary for a dream
+ *     tags:
+ *       - Dreams
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Dream ID
+ *     responses:
+ *       200:
+ *         description: Summary generated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 dream_id:
+ *                   type: integer
+ *                 ai_summary:
+ *                   type: string
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Dream not found
+ *       500:
+ *         description: Failed to summarize dream
+ */
+router.post("/:id/summary", dreamController.summarizeDream);
+
 module.exports = router;

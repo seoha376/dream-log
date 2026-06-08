@@ -67,6 +67,17 @@ const updateFavorite = async (dream_id, user_id, is_favorite) => {
   );
 };
 
+const updateDreamSummary = async (dream_id, user_id, ai_summary) => {
+  return await run(
+    `
+    UPDATE dreams
+    SET ai_summary = ?, updated_at = CURRENT_TIMESTAMP
+    WHERE dream_id = ? AND user_id = ?
+    `,
+    [ai_summary, dream_id, user_id]
+  );
+};
+
 const findTagById = async (tag_id) => {
   return await get(
     `
@@ -132,6 +143,7 @@ module.exports = {
   updateDream,
   deleteDream,
   updateFavorite,
+  updateDreamSummary,
   findTagById,
   addTagToDream,
   removeTagsFromDream,
