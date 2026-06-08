@@ -205,7 +205,7 @@ export default function DreamList() {
                   <div className="dreamlist-item-left">
                     <div className="dreamlist-item-top">
                       <span className="dreamlist-item-title">{dream.title}</span>
-                      {dream.is_favorite && <span className="dreamlist-item-fav">★</span>}
+                      {dream.is_favorite === 1 && <span className="dreamlist-item-fav">★</span>}
                     </div>
                     <p className="dreamlist-item-summary">
                       {dream.ai_summary || dream.content?.slice(0, 60) + "..."}
