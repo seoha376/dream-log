@@ -1,4 +1,4 @@
-const db = require("../db/database");
+const Dream = require("../models/Dream");
 
 exports.getDreams = async(req, res) => {
 
