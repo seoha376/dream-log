@@ -1,3 +1,5 @@
+// 실제 서버 실행 + DB 초기화
+
 require("dotenv").config();
 
 const app = require("./app");

@@ -1,3 +1,5 @@
+// Express 앱 정의만 담당
+
 require("dotenv").config();
 
 const express = require("express");
