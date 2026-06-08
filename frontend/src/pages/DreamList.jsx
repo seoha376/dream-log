@@ -11,15 +11,18 @@ export default function DreamList() {
   const [showTagFilter, setShowTagFilter] = useState(false);
   const [dreams, setDreams] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
 
   const loadDreams = async () => {
     setLoading(true);
+    setError(null);
     try {
       const res = await getDreams();
       setDreams(res.data);
     } catch (err) {
       console.error(err);
+      setError("Failed to load dreams. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -176,6 +179,13 @@ export default function DreamList() {
           {loading ? (
             <div className="dreamlist-empty">
               <p>Loading dreams...</p>
+            </div>
+          ) : error ? (
+            <div className="dreamlist-empty">
+              <p>{error}</p>
+              <button className="btn-primary" style={{ width: "auto", marginTop: 16 }} onClick={loadDreams}>
+                Try again
+              </button>
             </div>
           ) : filtered.length === 0 ? (
             <div className="dreamlist-empty">
