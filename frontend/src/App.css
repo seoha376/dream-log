@@ -648,3 +648,21 @@ img {
 @media (max-width: 480px) {
   .dream-create-title { font-size: 26px; }
 }
+
+/* ================================================
+   RESPONSIVE - MOBILE
+   ================================================ */
+@media (max-width: 768px) {
+  .dash-body {
+    flex-direction: column;
+    padding: 20px 16px;
+  }
+
+  .dash-right {
+    width: 100%;
+  }
+
+  .dash-left {
+    width: 100%;
+  }
+}

@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import logo from "../assets/logo.png";
 import { getDreams, deleteDream } from "../api/dreamApi";
 import { dreamTags } from "../data/tags";
+import Modal from "../components/Modal";
 
 export default function DreamList() {
   const navigate = useNavigate();
@@ -10,14 +11,22 @@ export default function DreamList() {
   const [selectedTags, setSelectedTags] = useState([]);
   const [showTagFilter, setShowTagFilter] = useState(false);
   const [dreams, setDreams] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [deleteModal, setDeleteModal] = useState({ open: false, dreamId: null });
 
-  
+
   const loadDreams = async () => {
+    setLoading(true);
+    setError(null);
     try {
       const res = await getDreams();
       setDreams(res.data);
     } catch (err) {
       console.error(err);
+      setError("Failed to load dreams. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -47,12 +56,14 @@ export default function DreamList() {
   });
 
   const handleDelete = async (dreamId) => {
-    try {
-      await deleteDream(dreamId);
-      alert("Deleted dream successfully");
+    setDeleteModal({ open: true, dreamId });
+  };
 
-      const res = await getDreams();
-      setDreams(res.data);
+  const confirmDelete = async () => {
+    try {
+      await deleteDream(deleteModal.dreamId);
+      setDeleteModal({ open: false, dreamId: null });
+      loadDreams();
     } catch (err) {
       console.error(err);
     }
@@ -169,7 +180,18 @@ export default function DreamList() {
           <div className="dreamlist-divider" />
 
           {/* Dream list */}
-          {filtered.length === 0 ? (
+          {loading ? (
+            <div className="dreamlist-empty">
+              <p>Loading dreams...</p>
+            </div>
+          ) : error ? (
+            <div className="dreamlist-empty">
+              <p>{error}</p>
+              <button className="btn-primary" style={{ width: "auto", marginTop: 16 }} onClick={loadDreams}>
+                Try again
+              </button>
+            </div>
+          ) : filtered.length === 0 ? (
             <div className="dreamlist-empty">
               <p>No dreams found.</p>
               <button className="btn-primary" style={{ width: "auto", marginTop: 16 }} onClick={() => navigate("/dream/create")}>
@@ -183,7 +205,7 @@ export default function DreamList() {
                   <div className="dreamlist-item-left">
                     <div className="dreamlist-item-top">
                       <span className="dreamlist-item-title">{dream.title}</span>
-                      {dream.is_favorite && <span className="dreamlist-item-fav">★</span>}
+                      {dream.is_favorite === 1 && <span className="dreamlist-item-fav">★</span>}
                     </div>
                     <p className="dreamlist-item-summary">
                       {dream.ai_summary || dream.content?.slice(0, 60) + "..."}
@@ -223,6 +245,13 @@ export default function DreamList() {
           )}
 
         </div>
+        <Modal
+          open={deleteModal.open}
+          type="confirm"
+          message="Are you sure you want to delete this dream?"
+          onClose={() => setDeleteModal({ open: false, dreamId: null })}
+          onConfirm={confirmDelete}
+        />
       </main>
     </div>
   );
