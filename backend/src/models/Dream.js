@@ -11,6 +11,16 @@ const createDream = async (user_id,dream_date,title,content) => {
   );
 };
 
+const updateDreamSummary = async (dream_id, user_id, ai_summary) => {
+  return await run(
+    `
+    UPDATE dreams
+    SET ai_summary = ?, updated_at = CURRENT_TIMESTAMP
+    WHERE dream_id = ? AND user_id = ?
+    `,
+    [ai_summary, dream_id, user_id]
+  );
+};
 const findDreamsByUserId = async (user_id) => {
   return await all(
     `
@@ -136,8 +146,8 @@ module.exports = {
   addTagToDream,
   removeTagsFromDream,
   findDreamsByUserIdAndTagId,
-  findDreamsByUserIdAndKeyword
+  findDreamsByUserIdAndKeyword,
+  updateDreamSummary  // ← 추가
 };
-
 
 
