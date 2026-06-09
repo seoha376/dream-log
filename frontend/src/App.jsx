@@ -9,6 +9,8 @@ import DreamDetail from "./pages/DreamDetail";
 import DreamCreate from "./pages/DreamCreate";
 import DreamEdit from "./pages/DreamEdit";
 import DreamList from "./pages/DreamList";
+import Favorites from "./pages/Favorites";
+
 
 
 
@@ -124,6 +126,7 @@ export default function App() {
         <Route path="/dream/create" element={<DreamCreate />} />
         <Route path="/dream/:id/edit" element={<DreamEdit />} />        
         <Route path="/dreams" element={<DreamList />} />
+        <Route path="/favorites" element={<Favorites />} />
         
       </Routes>
     </BrowserRouter>
