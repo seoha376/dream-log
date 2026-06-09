@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import logo from "../assets/logo.png";
-import { createDream } from "../api/dreamApi";  // ← 추가
+
+import { createDream } from "../api/dreamApi";
 import Modal from "../components/Modal";
-import { useEffect } from "react";
 import { getTags } from "../api/tagApi";
+
 
 
 export default function DreamCreate() {
@@ -15,12 +16,9 @@ export default function DreamCreate() {
     dream_date: "",
     tags: [],
   });
-
-
   const [modal, setModal] = useState({ open: false, type: "", message: "" });
   const [loading, setLoading] = useState(false);
   const [availableTags, setAvailableTags] = useState([]);
-
   useEffect(() => {
     const loadTags = async () => {
       try {
@@ -37,11 +35,11 @@ export default function DreamCreate() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleTagToggle = (tag) => {
-    if (form.tags.includes(tag)) {
-      setForm({ ...form, tags: form.tags.filter((t) => t !== tag) });
+  const handleTagToggle = (tag_id) => {
+    if (form.tags.includes(tag_id)) {
+      setForm({ ...form, tags: form.tags.filter((t) => t !== tag_id) });
     } else {
-      setForm({ ...form, tags: [...form.tags, tag] });
+      setForm({ ...form, tags: [...form.tags, tag_id] });
     }
   };
 
@@ -65,9 +63,9 @@ export default function DreamCreate() {
     setModal((prev) => ({ ...prev, open: false }));
     if (modal.type === "success") navigate("/dreams");
   };
+
   return (
     <div className="root">
-      {/* Starfield */}
       <div className="starfield" aria-hidden="true">
         {Array.from({ length: 40 }).map((_, i) => (
           <span
@@ -86,7 +84,6 @@ export default function DreamCreate() {
       </div>
       <div className="aurora" aria-hidden="true" />
 
-      {/* Navbar */}
       <nav className="nav">
         <Link to="/dashboard" className="nav-logo">
           <img src={logo} alt="Dream Log" className="nav-logo-img" />
@@ -98,7 +95,6 @@ export default function DreamCreate() {
         </div>
       </nav>
 
-      {/* Main */}
       <main className="dream-create-main">
         <div className="dream-create-card">
           <h2 className="dream-create-title">New Dream</h2>
@@ -106,7 +102,6 @@ export default function DreamCreate() {
 
           <form onSubmit={handleSubmit} className="dream-create-form">
 
-            {/* Title + Date 한 줄 */}
             <div className="field-row">
               <div className="field-group" style={{ flex: 2 }}>
                 <label className="field-label">TITLE</label>
@@ -132,7 +127,6 @@ export default function DreamCreate() {
               </div>
             </div>
 
-            {/* Content */}
             <div className="field-group">
               <label className="field-label">CONTENT</label>
               <textarea
@@ -146,7 +140,6 @@ export default function DreamCreate() {
               />
             </div>
 
-            {/* Tags */}
             <div className="field-group">
               <label className="field-label">TAGS</label>
               <div className="tag-selector">
@@ -170,6 +163,7 @@ export default function DreamCreate() {
 
           </form>
         </div>
+
         <Modal
           open={modal.open}
           type={modal.type}

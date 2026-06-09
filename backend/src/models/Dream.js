@@ -148,7 +148,7 @@ module.exports = {
   addTagToDream,
   removeTagsFromDream,
   findDreamsByUserIdAndTagId,
-  findDreamsByUserIdAndKeyword
+  findDreamsByUserIdAndKeyword,
 };
 
 

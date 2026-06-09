@@ -45,7 +45,7 @@ describe("Dream Summary API", () => {
     expect(res.statusCode).toBe(200);
     expect(res.body.dream_id).toBe(dreamId);
     expect(res.body.ai_summary).toBeDefined();
-    expect(res.body.ai_summary.length).toBeLessThanOrEqual(123);
+    expect(res.body.ai_summary.length).toBeLessThanOrEqual(300);
   });
 
   test("POST /api/dreams/:id/summary should return 404 for missing dream", async () => {

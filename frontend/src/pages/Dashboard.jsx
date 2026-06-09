@@ -167,6 +167,9 @@ export default function Dashboard() {
           <button className="btn-see-all" onClick={() => navigate("/dreams")}>
             See entire dreams
           </button>
+          <button className="btn-see-all" onClick={() => navigate("/favorites")}>
+  ★ Favorites
+</button>
 
           <div className="recent-label">Recent Dreams</div>
 

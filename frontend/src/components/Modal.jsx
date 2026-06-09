@@ -2,6 +2,7 @@ export default function Modal({ open, type, message, onClose, onConfirm }) {
   if (!open) return null;
 
   const isSuccess = type === "success";
+  const isConfirm = type === "confirm";
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -13,30 +14,27 @@ export default function Modal({ open, type, message, onClose, onConfirm }) {
           {isSuccess ? (
             <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
               <circle cx="20" cy="20" r="20" fill="rgba(167,139,250,0.15)" />
-              <path d="M12 20.5l5.5 5.5 10.5-11" stroke="#a78bfa" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          ) : type === "confirm" ? (
-            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-              <circle cx="20" cy="20" r="20" fill="rgba(251,191,36,0.15)" />
-              <path d="M20 12v10M20 26v2" stroke="#fbbf24" strokeWidth="2.5" strokeLinecap="round" />
+              <path d="M12 20.5l5.5 5.5 10.5-11" stroke="#a78bfa" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           ) : (
             <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
               <circle cx="20" cy="20" r="20" fill="rgba(248,113,113,0.15)" />
-              <path d="M14 14l12 12M26 14L14 26" stroke="#f87171" strokeWidth="2.5" strokeLinecap="round" />
+              <path d="M14 14l12 12M26 14L14 26" stroke="#f87171" strokeWidth="2.5" strokeLinecap="round"/>
             </svg>
           )}
         </div>
 
-        <h3 className="modal-heading">{isSuccess ? "Success" : type === "confirm" ? "Confirm" : "Error"}</h3>
+        <h3 className="modal-heading">
+          {isSuccess ? "Success!" : isConfirm ? "Confirm" : "Error"}
+        </h3>
         <p className="modal-message">{message}</p>
 
-        {onConfirm ? (
-          <div className="modal-btn-row">
+        {isConfirm ? (
+          <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
             <button className="modal-btn modal-btn-error" onClick={onConfirm}>
               Delete
             </button>
-            <button className="modal-btn modal-btn-cancel" onClick={onClose}>
+            <button className="modal-btn modal-btn-success" onClick={onClose}>
               Cancel
             </button>
           </div>
@@ -45,7 +43,7 @@ export default function Modal({ open, type, message, onClose, onConfirm }) {
             className={`modal-btn ${isSuccess ? "modal-btn-success" : "modal-btn-error"}`}
             onClick={onClose}
           >
-            Ok
+            Confirm
           </button>
         )}
       </div>

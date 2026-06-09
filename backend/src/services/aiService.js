@@ -14,24 +14,15 @@ const fallbackSummary = (content) => {
 
 const generateDreamSummary = async (content) => {
   if (!content) return "";
-
-
   const apiKey = process.env.GEMINI_API_KEY?.trim();
 
-  console.log("GEMINI KEY:", apiKey);
-  console.log("GEMINI KEY FIRST CHAR CODE:", apiKey?.charCodeAt(0));
-
-//   if (!process.env.GEMINI_API_KEY) {
-//     return fallbackSummary(content);
-//   }
-
+  
   if (!apiKey) {
       return fallbackSummary(content);
     }
 
   try {
     const ai = new GoogleGenAI({
-    //   apiKey: process.env.GEMINI_API_KEY
         apiKey
     });
 

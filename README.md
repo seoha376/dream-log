@@ -1,36 +1,51 @@
 # Dream Log
 
-An intelligent personal dream journal application that helps users record, organize, and revisit dreams through date-based tracking, tagging, and AI-powered summarization.
+Dream Log is an intelligent personal dream journal application that helps users record, organize, search, and revisit dreams through date-based tracking, tagging, favorites, and AI-powered summarization.
 
 ---
 
 ## Team
 
-- Song Seoha (Leader)
-- Eungyeol Kim
-- Mingyeong Kim
+* Song Seoha (Leader)
+* Eungyeol Kim
+* Mingyeong Kim
 
 ---
 
 ## Tech Stack
 
 ### Frontend
-- React
-- Vite
+
+* React
+* Vite
+* React Router
+* Axios
 
 ### Backend
-- Node.js
-- Express
 
-### Database
-- SQLite
+* Node.js
+* Express
+* SQLite
 
 ### Authentication
-- JWT
-- bcrypt
+
+* JWT
+* bcrypt
 
 ### AI Integration
-- OpenAI API
+
+* Google Gemini API
+* `@google/genai`
+
+### API Documentation
+
+* Swagger
+* Swagger UI
+
+### Testing
+
+* Jest
+* Supertest
 
 ---
 
@@ -45,22 +60,27 @@ dream-log/
 │       │   ├── Login.jsx
 │       │   ├── Register.jsx
 │       │   ├── Dashboard.jsx
+│       │   ├── DreamList.jsx
 │       │   ├── DreamCreate.jsx
 │       │   ├── DreamDetail.jsx
+│       │   ├── DreamEdit.jsx
+│       │   ├── Favorites.jsx
 │       │   └── Search.jsx
 │       │
-│       ├── components/
 │       ├── api/
 │       │   ├── authApi.js
 │       │   ├── dreamApi.js
 │       │   └── tagApi.js
 │       │
-│       ├── hooks/
-│       ├── context/
+│       ├── components/
+│       ├── assets/
 │       └── styles/
 │
 ├── backend/
 │   └── src/
+│       ├── app.js
+│       ├── server.js
+│       │
 │       ├── routes/
 │       │   ├── authRoutes.js
 │       │   ├── dreamRoutes.js
@@ -71,24 +91,35 @@ dream-log/
 │       │   ├── dreamController.js
 │       │   └── tagController.js
 │       │
-│       ├── middleware/
-│       │   └── authMiddleware.js
-│       │
-│       ├── db/
-│       │   └── database.js
-│       │
 │       ├── models/
-│       ├── utils/
-│       └── server.js
+│       │   ├── User.js
+│       │   ├── Dream.js
+│       │   ├── Tag.js
+│       │   └── DreamTag.js
+│       │
+│       ├── middleware/
+│       ├── services/
+│       ├── db/
+│       ├── docs/
+│       └── utils/
 │
-├── docs/
-│   ├── api/
-│   └── db/
-│
-├── .env.example
-├── .gitignore
-└── README.md
+├── README.md
+└── .gitignore
 ```
+
+---
+
+## Main Features
+
+* User registration and login
+* JWT-based authentication
+* Dream creation, editing, deletion, and retrieval
+* Dream tagging
+* Favorite dreams
+* Dream search
+* AI-powered dream summary generation
+* Swagger API documentation
+* Backend unit and API tests
 
 ---
 
@@ -102,7 +133,7 @@ npm install
 npm run dev
 ```
 
-Runs on:
+Default frontend URL:
 
 ```txt
 http://localhost:5173
@@ -116,92 +147,32 @@ npm install
 npm run dev
 ```
 
-Runs on:
+Default backend URL:
 
 ```txt
 http://localhost:5000
-```
-
-Health check:
-
-```txt
-GET /health
-```
-
-Example response:
-
-```json
-{
-  "success": true,
-  "message": "Dream Log API is running"
-}
 ```
 
 ---
 
 ## Environment Variables
 
-Create a `.env` file based on `.env.example`
+Create a `.env` file in the `backend` directory.
 
 ```env
-PORT=3000
+PORT=5000
 JWT_SECRET=your_jwt_secret
-OPENAI_API_KEY=your_openai_api_key
-DATABASE_PATH=./src/db/dreamlog.sqlite
+GEMINI_API_KEY=your_gemini_api_key
+DATABASE_PATH=./src/db/database.sqlite
+```
+
+Create a `.env` file in the `frontend` directory if a custom API URL is needed.
+
+```env
+VITE_API_URL=http://localhost:5000
 ```
 
 ---
-
-## Git Workflow
-
-### Branch naming
-
-```txt
-feature/auth
-feature/dream
-feature/calendar
-feature/ui-login
-feature/ui-dashboard
-feature/ai-summary
-```
-
-### Pull Request naming
-
-```txt
-[FE] Login UI
-[FE] Dashboard Layout
-[BE] Auth API
-[BE] Dream CRUD
-```
-
-### Rules
-
-- Do not push directly to `main`
-- Create a feature branch before working
-- Pull latest changes before starting work
-- Merge through Pull Requests
-
----
-
-## Current Progress
-
-### Completed
-
-- Repository setup
-- Frontend initialization
-- Backend initialization
-- Basic folder structure
-- Environment configuration
-- Health check API
-
-### Next
-
-- Database schema design
-- REST API specification
-- Authentication API
-- Login/Register UI
-- Dashboard UI
-
 
 ## API Documentation
 
@@ -213,81 +184,74 @@ http://localhost:5000/api/docs
 
 ---
 
+## Backend Scripts
+
+```bash
+cd backend
+npm run dev
+npm start
+npm test
+```
+
+---
+
+## Frontend Scripts
+
+```bash
+cd frontend
+npm run dev
+npm run build
+npm run preview
+npm run lint
+```
+
+---
+
 ## Testing
 
-The backend test suite is implemented using **Jest** and **Supertest**.
-
-### Test Coverage
-#### Unit Tests
-
-* authMiddleware
-* response utility
-
-#### API Tests
-
-* User registration
-* User login
-* Protected route authentication
-* Dream creation
-* Dream retrieval
-* Error handling
-
-#### Error Cases Covered
-
-* 400 Bad Request
-* 401 Unauthorized
-* 404 Not Found
-
-### Run Tests
+The backend test suite uses Jest and Supertest.
 
 ```bash
 cd backend
 npm test
 ```
 
-Example output:
-
-```txt
-PASS tests/unit/authMiddleware.test.js
-PASS tests/unit/response.test.js
-PASS tests/api/auth.test.js
-PASS tests/api/protected.test.js
-PASS tests/api/dream.test.js
-
-Test Suites: 5 passed, 5 total
-Tests: 14 passed, 14 total
-```
+The tests cover authentication, protected routes, dream APIs, response handling, and error cases.
 
 ---
 
-## Continuous Integration
+## Git Workflow
 
-GitHub Actions automatically runs the backend test suite on every push and pull request.
+### Branch Rules
 
-Workflow file:
+* Do not push directly to `main`.
+* Work on a feature or test branch.
+* Pull the latest changes before starting work.
+* Resolve conflicts locally before pushing.
+* Merge through pull requests or agreed team integration branches.
+
+### Example Branch Names
 
 ```txt
-.github/workflows/test.yml
+feature/auth
+feature/dream
+feature/tag
+feature/ai-summary
+test/backend-integration
+test/total-integration
 ```
-
-The workflow performs:
-
-* Dependency installation
-* Jest test execution
-* API integration test execution
-* CI validation before merge
 
 ---
 
 ## AI Use Disclosure
 
-AI assistance (ChatGPT) was used during development for:
+AI assistance was used during development for:
 
 * Code review
 * Debugging support
 * Test planning
 * API documentation assistance
-* CI/CD workflow setup
 * README drafting
+* Git conflict resolution support
 
 All generated code and documentation were reviewed, tested, modified, and understood by the project team before submission.

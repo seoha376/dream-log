@@ -5,6 +5,7 @@ const authMiddleware = require("../middleware/authMiddleware");
 const dreamController = require("../controllers/dreamController");
 
 router.use(authMiddleware);
+
 /**
  * @swagger
  * /api/dreams:
@@ -37,7 +38,6 @@ router.use(authMiddleware);
  *         description: Failed to get dreams
  */
 router.get("/", dreamController.getDreams);
-
 
 /**
  * @swagger
@@ -102,7 +102,6 @@ router.get("/:id", dreamController.getDream);
  */
 router.post("/", dreamController.createDream);
 
-
 /**
  * @swagger
  * /api/dreams/{id}:
@@ -139,7 +138,6 @@ router.post("/", dreamController.createDream);
  */
 router.patch("/:id", dreamController.updateDream);
 
-
 /**
  * @swagger
  * /api/dreams/{id}:
@@ -161,7 +159,6 @@ router.patch("/:id", dreamController.updateDream);
  *         description: Dream not found
  */
 router.delete("/:id", dreamController.deleteDream);
-
 
 /**
  * @swagger

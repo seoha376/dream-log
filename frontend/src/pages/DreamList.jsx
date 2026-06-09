@@ -12,19 +12,20 @@ export default function DreamList() {
   const [showTagFilter, setShowTagFilter] = useState(false);
   const [dreams, setDreams] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(null);
   const [deleteModal, setDeleteModal] = useState({ open: false, dreamId: null });
   const [availableTags, setAvailableTags] = useState([]);
 
   const loadDreams = async () => {
     setLoading(true);
-    setError(null);
+    setErrorMsg(null);
     try {
       const res = await getDreams();
-      setDreams(res.data);
+      const data = Array.isArray(res.data) ? res.data : res.data?.data?.dreams || res.data?.dreams || [];
+      setDreams(data);
     } catch (err) {
       console.error(err);
-      setError("Failed to load dreams. Please try again.");
+      setErrorMsg("Failed to load dreams. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -43,30 +44,24 @@ export default function DreamList() {
     loadTags();
   }, []);
 
-  const handleTagToggle = (tag) => {
-    if (selectedTags.includes(tag)) {
-      setSelectedTags(selectedTags.filter((t) => t !== tag));
-    } else {
-      setSelectedTags([...selectedTags, tag]);
-    }
+  const handleTagToggle = (tagId) => {
+    setSelectedTags((prev) =>
+      prev.includes(tagId) ? prev.filter((t) => t !== tagId) : [...prev, tagId]
+    );
   };
 
   const filtered = dreams.filter((dream) => {
     const matchSearch =
       search === "" ||
-      dream.title.toLowerCase().includes(search.toLowerCase()) ||
-      dream.content.toLowerCase().includes(search.toLowerCase());
-
+      dream.title?.toLowerCase().includes(search.toLowerCase()) ||
+      dream.content?.toLowerCase().includes(search.toLowerCase());
     const matchTags =
       selectedTags.length === 0 ||
-      selectedTags.every((tag) => dream.tags?.includes(tag));
-
+      selectedTags.every((tagId) => dream.tags?.includes(tagId));
     return matchSearch && matchTags;
   });
 
-  const handleDelete = async (dreamId) => {
-    setDeleteModal({ open: true, dreamId });
-  };
+  const handleDelete = (dreamId) => setDeleteModal({ open: true, dreamId });
 
   const confirmDelete = async () => {
     try {
@@ -80,65 +75,43 @@ export default function DreamList() {
 
   return (
     <div className="root">
-      {/* Starfield */}
       <div className="starfield" aria-hidden="true">
         {Array.from({ length: 40 }).map((_, i) => (
-          <span
-            key={i}
-            className="star"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              width: Math.random() * 2.5 + 0.5,
-              height: Math.random() * 2.5 + 0.5,
-              animationDelay: `${Math.random() * 4}s`,
-              animationDuration: `${Math.random() * 3 + 2}s`,
-            }}
-          />
+          <span key={i} className="star" style={{
+            left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%`,
+            width: Math.random() * 2.5 + 0.5, height: Math.random() * 2.5 + 0.5,
+            animationDelay: `${Math.random() * 4}s`, animationDuration: `${Math.random() * 3 + 2}s`,
+          }} />
         ))}
       </div>
       <div className="aurora" aria-hidden="true" />
 
-      {/* Navbar */}
       <nav className="nav">
         <Link to="/dashboard" className="nav-logo">
           <img src={logo} alt="Dream Log" className="nav-logo-img" />
         </Link>
         <div className="nav-actions">
-          <button className="btn-ghost" onClick={() => navigate("/dashboard")}>
-            ← Back
-          </button>
-          <button className="btn-orange" onClick={() => navigate("/dream/create")}>
-            + New Dream
-          </button>
+          <button className="btn-ghost" onClick={() => navigate("/dashboard")}>← Back</button>
+          <button className="btn-orange" onClick={() => navigate("/dream/create")}>+ New Dream</button>
         </div>
       </nav>
 
-      {/* Main */}
       <main className="dreamlist-main">
         <div className="dreamlist-card">
-
-          {/* Header */}
           <div className="dreamlist-header">
             <div>
               <h2 className="dreamlist-title">All Dreams</h2>
-              <p className="dreamlist-subtitle">{filtered.length} dream{filtered.length !== 1 ? "s" : ""} found</p>
+              <p className="dreamlist-subtitle">
+                {loading ? "Loading..." : `${filtered.length} dream${filtered.length !== 1 ? "s" : ""} found`}
+              </p>
             </div>
-
-            {/* Search bar */}
             <div className="dreamlist-search-wrap">
-              <input
-                className="dreamlist-search"
-                type="text"
-                placeholder="Search dreams..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
+              <input className="dreamlist-search" type="text" placeholder="Search dreams..."
+                value={search} onChange={(e) => setSearch(e.target.value)} />
               <span className="dreamlist-search-icon">🔍</span>
             </div>
           </div>
 
-          {/* Tag filter toggle */}
           <div className="dreamlist-filter-row">
             <button
               className={`dreamlist-filter-btn ${showTagFilter ? "active" : ""}`}
@@ -147,16 +120,10 @@ export default function DreamList() {
               🏷️ Filter by tag {selectedTags.length > 0 && `(${selectedTags.length})`}
             </button>
             {selectedTags.length > 0 && (
-              <button
-                className="dreamlist-clear-btn"
-                onClick={() => setSelectedTags([])}
-              >
-                Clear filters
-              </button>
+              <button className="dreamlist-clear-btn" onClick={() => setSelectedTags([])}>Clear filters</button>
             )}
           </div>
 
-          {/* Tag filter panel */}
           {showTagFilter && (
             <div className="dreamlist-tag-panel">
               {availableTags.map((tag) => (
@@ -171,7 +138,6 @@ export default function DreamList() {
             </div>
           )}
 
-          {/* Active tag pills */}
           {selectedTags.length > 0 && (
             <div className="dreamlist-active-tags">
               {selectedTags.map((tagId) => {
@@ -187,17 +153,12 @@ export default function DreamList() {
 
           <div className="dreamlist-divider" />
 
-          {/* Dream list */}
           {loading ? (
+            <div className="dreamlist-empty"><p>Loading dreams...</p></div>
+          ) : errorMsg ? (
             <div className="dreamlist-empty">
-              <p>Loading dreams...</p>
-            </div>
-          ) : error ? (
-            <div className="dreamlist-empty">
-              <p>{error}</p>
-              <button className="btn-primary" style={{ width: "auto", marginTop: 16 }} onClick={loadDreams}>
-                Try again
-              </button>
+              <p>{errorMsg}</p>
+              <button className="btn-primary" style={{ width: "auto", marginTop: 16 }} onClick={loadDreams}>Try again</button>
             </div>
           ) : filtered.length === 0 ? (
             <div className="dreamlist-empty">
@@ -213,49 +174,34 @@ export default function DreamList() {
                   <div className="dreamlist-item-left">
                     <div className="dreamlist-item-top">
                       <span className="dreamlist-item-title">{dream.title}</span>
-                      {dream.is_favorite === 1 && <span className="dreamlist-item-fav">★</span>}
+                      {(dream.is_favorite === 1 || dream.is_favorite === true) && <span className="dreamlist-item-fav">★</span>}
                     </div>
                     <p className="dreamlist-item-summary">
-                      {dream.ai_summary || dream.content?.slice(0, 60) + "..."}
+                      {dream.ai_summary || (dream.content?.slice(0, 60) + "...")}
                     </p>
                     <div className="dreamlist-item-tags">
                       {dream.tags?.map((tagId) => {
                         const tag = availableTags.find((t) => t.tag_id === tagId);
                         return (
-                          <span key={tagId} className="dream-detail-tag">#{tag?.name}</span>
+                          <span key={tagId} className="dream-detail-tag">#{tag?.name || tagId}</span>
                         );
                       })}
                     </div>
                   </div>
                   <div className="dreamlist-item-date">{dream.dream_date}</div>
                   <div className="dreamlist-item-actions">
-                    <button
-                      className="dreamlist-action-btn"
-                      onClick={() => navigate(`/dream/${dream.dream_id}`)}
-                    >
-                      Read
-                    </button>
+                    <button className="dreamlist-action-btn" onClick={() => navigate(`/dream/${dream.dream_id}`)}>Read</button>
                     <span className="dreamlist-action-sep">/</span>
-                    <button
-                      className="dreamlist-action-btn"
-                      onClick={() => navigate(`/dream/${dream.dream_id}/edit`)}
-                    >
-                      Update
-                    </button>
+                    <button className="dreamlist-action-btn" onClick={() => navigate(`/dream/${dream.dream_id}/edit`)}>Update</button>
                     <span className="dreamlist-action-sep">/</span>
-                    <button
-                      className="dreamlist-action-btn dreamlist-action-delete"
-                      onClick={() => handleDelete(dream.dream_id)}
-                    >
-                      Delete
-                    </button>
+                    <button className="dreamlist-action-btn dreamlist-action-delete" onClick={() => handleDelete(dream.dream_id)}>Delete</button>
                   </div>
                 </div>
               ))}
             </div>
           )}
-
         </div>
+
         <Modal
           open={deleteModal.open}
           type="confirm"
