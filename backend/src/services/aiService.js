@@ -1,5 +1,3 @@
-// backend/src/services/aiService.js
-
 const { GoogleGenAI } = require("@google/genai");
 
 const fallbackSummary = (content) => {
@@ -17,25 +15,44 @@ const fallbackSummary = (content) => {
 const generateDreamSummary = async (content) => {
   if (!content) return "";
 
-  if (!process.env.GEMINI_API_KEY) {
-    return fallbackSummary(content);
-  }
+
+  const apiKey = process.env.GEMINI_API_KEY?.trim();
+
+  console.log("GEMINI KEY:", apiKey);
+  console.log("GEMINI KEY FIRST CHAR CODE:", apiKey?.charCodeAt(0));
+
+//   if (!process.env.GEMINI_API_KEY) {
+//     return fallbackSummary(content);
+//   }
+
+  if (!apiKey) {
+      return fallbackSummary(content);
+    }
 
   try {
     const ai = new GoogleGenAI({
-      apiKey: process.env.GEMINI_API_KEY
+    //   apiKey: process.env.GEMINI_API_KEY
+        apiKey
     });
 
     const response = await ai.models.generateContent({
-      model: "gemini-1.5-flash",
-      contents: `
-Summarize the following dream in 1-2 concise sentences.
+      model: "gemini-2.5-flash-lite",
+      contents: [
+        {
+          role: "user",
+          parts: [
+            {
+              text: `Summarize the following dream in 1-2 concise sentences.
 Keep the tone natural and reflective.
 Do not add information that is not in the dream.
 
 Dream:
 ${content}
 `
+            }
+          ]
+        }
+      ]
     });
 
     const summary = response.text?.trim();
@@ -46,9 +63,10 @@ ${content}
 
     return summary;
   } catch (err) {
-    console.error("GEMINI SUMMARY ERROR:", err.message);
-    return fallbackSummary(content);
-  }
+      console.error("GEMINI SUMMARY ERROR FULL:");
+      console.error(err);
+      return fallbackSummary(content);
+    }
 };
 
 module.exports = {
