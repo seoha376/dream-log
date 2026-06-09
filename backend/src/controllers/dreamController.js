@@ -1,4 +1,5 @@
 const Dream = require("../models/Dream");
+const DreamTag = require("../models/DreamTag");
 
 exports.getDreams = async (req, res) => {
   try {
@@ -6,7 +7,6 @@ exports.getDreams = async (req, res) => {
     const { tag, keyword } = req.query;
 
     let dreams;
-
     if (tag) {
       dreams = await Dream.findDreamsByUserIdAndTagId(userId, tag);
     } else if (keyword) {
@@ -14,13 +14,18 @@ exports.getDreams = async (req, res) => {
     } else {
       dreams = await Dream.findDreamsByUserId(userId);
     }
-    res.json(dreams);
+
+    const dreamsWithTags = await Promise.all(
+      dreams.map(async (dream) => {
+        const tags = await DreamTag.findTagsByDreamId(dream.dream_id);
+        return { ...dream, tags: tags.map((t) => t.tag_id) };
+      })
+    );
+
+    res.json(dreamsWithTags);
   } catch (err) {
     console.error("GET DREAMS ERROR:", err.message);
-    res.status(500).json({
-      code: "GET_DREAMS_FAILED",
-      message: "Failed to get dreams"
-    });
+    res.status(500).json({ code: "GET_DREAMS_FAILED", message: "Failed to get dreams" });
   }
 };
 
@@ -30,21 +35,15 @@ exports.getDream = async (req, res) => {
     const dreamId = req.params.id;
 
     const dream = await Dream.findDreamByIdAndUserId(dreamId, userId);
-
     if (!dream) {
-      return res.status(404).json({
-        code: "DREAM_NOT_FOUND",
-        message: "Dream not found"
-      });
+      return res.status(404).json({ code: "DREAM_NOT_FOUND", message: "Dream not found" });
     }
 
-    res.json(dream);
+    const tags = await DreamTag.findTagsByDreamId(dreamId);
+    res.json({ ...dream, tags: tags.map((t) => t.tag_id) });
   } catch (err) {
     console.error("GET DREAM ERROR:", err.message);
-    res.status(500).json({
-      code: "GET_DREAM_FAILED",
-      message: "Failed to get dream"
-    });
+    res.status(500).json({ code: "GET_DREAM_FAILED", message: "Failed to get dream" });
   }
 };
 
@@ -124,21 +123,21 @@ exports.updateDream = async (req, res) => {
     const nextDate = dream_date ?? existingDream.dream_date;
 
     await Dream.updateDream
-    (dreamId, userId, nextTitle, nextContent, nextDate);
+      (dreamId, userId, nextTitle, nextContent, nextDate);
 
     if (Array.isArray(tags)) {
       await Dream.removeTagsFromDream(dreamId);
 
       for (const tagId of tags) {
         const tag = await Dream.findTagById(tagId);
-      
+
         if (!tag) {
           return res.status(400).json({
             code: "INVALID_TAG_ID",
             message: `Invalid tag_id: ${tagId}`
           });
         }
-      
+
         await Dream.addTagToDream(dreamId, tagId);
       }
     }

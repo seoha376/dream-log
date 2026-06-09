@@ -45,16 +45,18 @@ const initDb = () => {
     `);
 
     const initialTags = [
+      "lucid",
       "nightmare",
-      "happy",
-      "sad",
-      "family",
-      "friend",
-      "school",
-      "work",
-      "travel",
-      "fantasy",
-      "lucid"
+      "recurring",
+      "flying",
+      "falling",
+      "chase",
+      "prophetic",
+      "healing",
+      "adventure",
+      "anxiety",
+      "deceased",
+      "water"
     ];
 
     const insertTag = db.prepare(`
