@@ -89,7 +89,7 @@ export default function DreamDetail() {
           <img src={logo} alt="Dream Log" className="nav-logo-img" />
         </Link>
         <div className="nav-actions">
-          <button className="btn-ghost" onClick={() => navigate(-1)}>← Back</button>
+          <button className="btn-ghost" onClick={() => navigate("/dreams")}>← Back</button>
           <button className="btn-orange" onClick={() => navigate(`/dream/${id}/edit`)}>Edit</button>
         </div>
       </nav>
