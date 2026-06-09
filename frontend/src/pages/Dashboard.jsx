@@ -23,13 +23,16 @@ export default function Dashboard() {
   const [selectedDay, setSelectedDay] = useState(today.getDate());
   const [recentDreams, setRecentDreams] = useState([]);
   const [dreamDates, setDreamDates] = useState({});
+  const [allDreams, setAllDreams] = useState([]);
 
   useEffect(() => {
     const loadDreams = async () => {
       try {
         const res = await getDreams();
         const dreams = res.data;
+        setAllDreams(dreams);
         setRecentDreams(dreams.slice(0, 3));
+
         const dates = {};
         dreams.forEach((d) => {
           const [year, month, day] = d.dream_date.split("-");
@@ -75,6 +78,8 @@ export default function Dashboard() {
     selectedYear === today.getFullYear();
 
   const hasDream = (day) => dreamDates[`${selectedYear}-${selectedMonth}-${day}`];
+  const selectedDateStr = `${selectedYear}-${String(selectedMonth + 1).padStart(2, "0")}-${String(selectedDay).padStart(2, "0")}`;
+  const selectedDayDreams = allDreams.filter((d) => d.dream_date === selectedDateStr);
 
   return (
     <div className="root">
@@ -180,8 +185,33 @@ export default function Dashboard() {
               </div>
             ))}
           </div>
-        </div>
+          
+          <div className="recent-label" style={{ marginTop: 24 }}>
+            {selectedYear}-{String(selectedMonth + 1).padStart(2, "0")}-{String(selectedDay).padStart(2, "0")} Dreams
+          </div>
 
+          <div className="recent-list">
+            {selectedDayDreams.length === 0 ? (
+              <p style={{ color: "var(--text-muted)", fontSize: "0.85rem", textAlign: "center", padding: "16px 0" }}>
+                No dreams on this day.
+              </p>
+            ) : (
+              selectedDayDreams.map((dream) => (
+                <div
+                  key={dream.dream_id}
+                  className="dream-item"
+                  onClick={() => navigate(`/dream/${dream.dream_id}`)}
+                >
+                  <div className="dream-item-top">
+                    <span className="dream-item-title">{dream.title}</span>
+                    <span className="dream-item-date">{dream.dream_date}</span>
+                  </div>
+                  <p className="dream-item-preview">{dream.ai_summary || dream.content?.slice(0, 50)}</p>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
