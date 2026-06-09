@@ -91,7 +91,11 @@ exports.createDream = async (req, res) => {
     });
   } catch (err) {
     console.error("CREATE DREAM ERROR:", err.message);
-    res.status(500).json({ code: "CREATE_DREAM_FAILED", message: "Failed to create dream" });
+    console.error(err);
+
+    res.status(500).json({ 
+      code: "CREATE_DREAM_FAILED", 
+      message: err.message });
   }
 };
 
