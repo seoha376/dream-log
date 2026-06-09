@@ -2,18 +2,23 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import logo from "../assets/logo.png";
 import { getDream, toggleFavorite } from "../api/dreamApi";
+import { getTags } from "../api/tagApi";
 
 export default function DreamDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [dream, setDream] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [availableTags, setAvailableTags] = useState([]);
 
   useEffect(() => {
     const loadDream = async () => {
       try {
         const res = await getDream(id);
         setDream(res.data);
+
+        const tagsRes = await getTags();
+        setAvailableTags(Array.isArray(tagsRes.data) ? tagsRes.data : tagsRes.data.data || []);
       } catch (err) {
         console.error(err);
         setDream(null);
@@ -21,8 +26,6 @@ export default function DreamDetail() {
         setLoading(false);
       }
     };
-
-    
     loadDream();
   }, [id]);
 
@@ -112,9 +115,12 @@ export default function DreamDetail() {
           {/* Tags */}
           {dream.tags?.length > 0 && (
             <div className="dream-detail-tags">
-              {dream.tags.map((tag) => (
-                <span key={tag} className="dream-detail-tag">#{tag}</span>
-              ))}
+              {dream.tags?.map((tagId) => {
+                const tag = availableTags.find((t) => t.tag_id === tagId);
+                return (
+                  <span key={tagId} className="dream-detail-tag">#{tag?.name}</span>
+                );
+              })}
             </div>
           )}
 

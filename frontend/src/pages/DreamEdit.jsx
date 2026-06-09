@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import logo from "../assets/logo.png";
-import { dreamTags } from "../data/tags";
+import { getTags } from "../api/tagApi";
 import { getDream, updateDream } from "../api/dreamApi";
 
 export default function DreamEdit() {
@@ -10,40 +10,43 @@ export default function DreamEdit() {
   const [dream, setDream] = useState(null);
 
   const [form, setForm] = useState({
-  title: "",
-  content: "",
-  dream_date: "",
-  tags: [],
-});
+    title: "",
+    content: "",
+    dream_date: "",
+    tags: [],
+  });
 
-const [loading, setLoading] = useState(true);
-const [notFound, setNotFound] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
+  const [availableTags, setAvailableTags] = useState([]);
 
+  useEffect(() => {
+    async function loadDream() {
+      try {
+        const response = await getDream(id);
+        const dreamData = response.data;
 
-useEffect(() => {
-  async function loadDream() {
-    try {
-      const response = await getDream(id);
-      const dreamData = response.data;
+        const tagsRes = await getTags();
+        setAvailableTags(Array.isArray(tagsRes.data) ? tagsRes.data : tagsRes.data.data || []);
 
-      setForm({
-        title: dreamData.title || "",
-        content: dreamData.content || "",
-        dream_date: dreamData.dream_date
-        ? dreamData.dream_date.slice(0, 10) 
-        : "",
-        tags: dreamData.tags || [],
-      });
-    } catch (err) {
-      console.error(err);
-      setNotFound(true);
-    } finally {
-      setLoading(false);
+        setForm({
+          title: dreamData.title || "",
+          content: dreamData.content || "",
+          dream_date: dreamData.dream_date
+            ? dreamData.dream_date.slice(0, 10)
+            : "",
+          tags: dreamData.tags || [],
+        });
+      } catch (err) {
+        console.error(err);
+        setNotFound(true);
+      } finally {
+        setLoading(false);
+      }
     }
-  }
 
-  loadDream();
-}, [id]);
+    loadDream();
+  }, [id]);
 
   // if (!dream) {
   //   return (
@@ -64,35 +67,35 @@ useEffect(() => {
   //   );
   // }
 
-if (loading) {
-  return (
-    <div className="root">
-      <main className="dream-detail-main">
-        <div className="dream-detail-card">
-          <p>Loading...</p>
-        </div>
-      </main>
-    </div>
-  );
-}
+  if (loading) {
+    return (
+      <div className="root">
+        <main className="dream-detail-main">
+          <div className="dream-detail-card">
+            <p>Loading...</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
-if (notFound) {
-  return (
-    <div className="root">
-      <main className="dream-detail-main">
-        <div className="dream-detail-card">
-          <p className="dream-detail-empty">Dream not found.</p>
-          <button
-            className="btn-ghost"
-            onClick={() => navigate("/dashboard")}
-          >
-            ← Back
-          </button>
-        </div>
-      </main>
-    </div>
-  );
-}
+  if (notFound) {
+    return (
+      <div className="root">
+        <main className="dream-detail-main">
+          <div className="dream-detail-card">
+            <p className="dream-detail-empty">Dream not found.</p>
+            <button
+              className="btn-ghost"
+              onClick={() => navigate("/dashboard")}
+            >
+              ← Back
+            </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
 
 
@@ -105,26 +108,27 @@ if (notFound) {
   };
 
 
-    const handleChange = (e) => {
+  const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  try {
-    await updateDream(id, {
-      title: form.title,
-      content: form.content,
-      dream_date: form.dream_date,
-    });
+    try {
+      await updateDream(id, {
+        title: form.title,
+        content: form.content,
+        dream_date: form.dream_date,
+        tags: form.tags,
+      });
 
-    navigate(`/dream/${id}`);
-  } catch (err) {
-    console.error(err);
-    alert("Failed to update dream.");
-  }
-};
+      navigate(`/dream/${id}`);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to update dream.");
+    }
+  };
 
   // const handleSubmit = (e) => {
   //   e.preventDefault();
@@ -218,14 +222,14 @@ if (notFound) {
             <div className="field-group">
               <label className="field-label">TAGS</label>
               <div className="tag-selector">
-                {dreamTags.map((tag) => (
+                {availableTags.map((tag) => (
                   <button
                     type="button"
-                    key={tag}
-                    className={`tag-btn ${form.tags.includes(tag) ? "tag-btn-active" : ""}`}
-                    onClick={() => handleTagToggle(tag)}
+                    key={tag.tag_id}
+                    className={`tag-btn ${form.tags.includes(tag.tag_id) ? "tag-btn-active" : ""}`}
+                    onClick={() => handleTagToggle(tag.tag_id)}
                   >
-                    {tag}
+                    {tag.name}
                   </button>
                 ))}
               </div>

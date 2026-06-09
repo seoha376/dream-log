@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import logo from "../assets/logo.png";
 import { getDreams, deleteDream } from "../api/dreamApi";
-import { dreamTags } from "../data/tags";
+import { getTags } from "../api/tagApi";
 import Modal from "../components/Modal";
 
 export default function DreamList() {
@@ -14,7 +14,7 @@ export default function DreamList() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [deleteModal, setDeleteModal] = useState({ open: false, dreamId: null });
-
+  const [availableTags, setAvailableTags] = useState([]);
 
   const loadDreams = async () => {
     setLoading(true);
@@ -32,6 +32,15 @@ export default function DreamList() {
 
   useEffect(() => {
     loadDreams();
+    const loadTags = async () => {
+      try {
+        const res = await getTags();
+        setAvailableTags(Array.isArray(res.data) ? res.data : res.data.data || []);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    loadTags();
   }, []);
 
   const handleTagToggle = (tag) => {
@@ -150,13 +159,13 @@ export default function DreamList() {
           {/* Tag filter panel */}
           {showTagFilter && (
             <div className="dreamlist-tag-panel">
-              {dreamTags.map((tag) => (
+              {availableTags.map((tag) => (
                 <button
-                  key={tag}
-                  className={`tag-btn ${selectedTags.includes(tag) ? "tag-btn-active" : ""}`}
-                  onClick={() => handleTagToggle(tag)}
+                  key={tag.tag_id}
+                  className={`tag-btn ${selectedTags.includes(tag.tag_id) ? "tag-btn-active" : ""}`}
+                  onClick={() => handleTagToggle(tag.tag_id)}
                 >
-                  {tag}
+                  {tag.name}
                 </button>
               ))}
             </div>
@@ -165,15 +174,14 @@ export default function DreamList() {
           {/* Active tag pills */}
           {selectedTags.length > 0 && (
             <div className="dreamlist-active-tags">
-              {selectedTags.map((tag) => (
-                <span
-                  key={tag}
-                  className="dreamlist-active-tag"
-                  onClick={() => handleTagToggle(tag)}
-                >
-                  #{tag} ✕
-                </span>
-              ))}
+              {selectedTags.map((tagId) => {
+                const tag = availableTags.find((t) => t.tag_id === tagId);
+                return (
+                  <span key={tagId} className="dreamlist-active-tag" onClick={() => handleTagToggle(tagId)}>
+                    #{tag?.name} ✕
+                  </span>
+                );
+              })}
             </div>
           )}
 
@@ -211,9 +219,12 @@ export default function DreamList() {
                       {dream.ai_summary || dream.content?.slice(0, 60) + "..."}
                     </p>
                     <div className="dreamlist-item-tags">
-                      {dream.tags?.map((tag) => (
-                        <span key={tag} className="dream-detail-tag">#{tag}</span>
-                      ))}
+                      {dream.tags?.map((tagId) => {
+                        const tag = availableTags.find((t) => t.tag_id === tagId);
+                        return (
+                          <span key={tagId} className="dream-detail-tag">#{tag?.name}</span>
+                        );
+                      })}
                     </div>
                   </div>
                   <div className="dreamlist-item-date">{dream.dream_date}</div>
