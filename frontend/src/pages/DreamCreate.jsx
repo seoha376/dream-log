@@ -1,10 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import logo from "../assets/logo.png";
-import { dreamTags } from "../data/tags";
-import { createDream } from "../api/dreamApi";  // ← 추가
-import Modal from "../components/Modal"; 
-
+import { createDream } from "../api/dreamApi";
+import { getTags } from "../api/tagApi";
+import Modal from "../components/Modal";
 
 export default function DreamCreate() {
   const navigate = useNavigate();
@@ -14,46 +13,58 @@ export default function DreamCreate() {
     dream_date: "",
     tags: [],
   });
+  const [modal, setModal] = useState({ open: false, type: "", message: "" });
+  const [loading, setLoading] = useState(false);
+  const [availableTags, setAvailableTags] = useState([]);
 
-  
-const [modal, setModal] = useState({ open: false, type: "", message: "" });
-const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    const loadTags = async () => {
+      try {
+        const res = await getTags();
+        setAvailableTags(Array.isArray(res.data) ? res.data : res.data.data || []);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    loadTags();
+  }, []);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleTagToggle = (tag) => {
-    if (form.tags.includes(tag)) {
-      setForm({ ...form, tags: form.tags.filter((t) => t !== tag) });
+  const handleTagToggle = (tag_id) => {
+    if (form.tags.includes(tag_id)) {
+      setForm({ ...form, tags: form.tags.filter((t) => t !== tag_id) });
     } else {
-      setForm({ ...form, tags: [...form.tags, tag] });
+      setForm({ ...form, tags: [...form.tags, tag_id] });
     }
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
-  try {
-    await createDream(form);
-    setModal({ open: true, type: "success", message: "Dream saved! 🌙" });
-  } catch (err) {
-    setModal({
-      open: true,
-      type: "error",
-      message: err?.response?.data?.message || "Failed to save dream.",
-    });
-  } finally {
-    setLoading(false);
-  }
-};
-const handleModalClose = () => {
-  setModal((prev) => ({ ...prev, open: false }));
-  if (modal.type === "success") navigate("/dreams");
-};
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await createDream(form);
+      setModal({ open: true, type: "success", message: "Dream saved! 🌙" });
+    } catch (err) {
+      setModal({
+        open: true,
+        type: "error",
+        message: err?.response?.data?.message || "Failed to save dream.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleModalClose = () => {
+    setModal((prev) => ({ ...prev, open: false }));
+    if (modal.type === "success") navigate("/dreams");
+  };
+
   return (
     <div className="root">
-      {/* Starfield */}
       <div className="starfield" aria-hidden="true">
         {Array.from({ length: 40 }).map((_, i) => (
           <span
@@ -72,7 +83,6 @@ const handleModalClose = () => {
       </div>
       <div className="aurora" aria-hidden="true" />
 
-      {/* Navbar */}
       <nav className="nav">
         <Link to="/dashboard" className="nav-logo">
           <img src={logo} alt="Dream Log" className="nav-logo-img" />
@@ -84,7 +94,6 @@ const handleModalClose = () => {
         </div>
       </nav>
 
-      {/* Main */}
       <main className="dream-create-main">
         <div className="dream-create-card">
           <h2 className="dream-create-title">New Dream</h2>
@@ -92,7 +101,6 @@ const handleModalClose = () => {
 
           <form onSubmit={handleSubmit} className="dream-create-form">
 
-            {/* Title + Date 한 줄 */}
             <div className="field-row">
               <div className="field-group" style={{ flex: 2 }}>
                 <label className="field-label">TITLE</label>
@@ -118,7 +126,6 @@ const handleModalClose = () => {
               </div>
             </div>
 
-            {/* Content */}
             <div className="field-group">
               <label className="field-label">CONTENT</label>
               <textarea
@@ -132,36 +139,35 @@ const handleModalClose = () => {
               />
             </div>
 
-            {/* Tags */}
             <div className="field-group">
               <label className="field-label">TAGS</label>
               <div className="tag-selector">
-                {dreamTags.map((tag) => (
+                {availableTags.map((tag) => (
                   <button
                     type="button"
-                    key={tag}
-                    className={`tag-btn ${form.tags.includes(tag) ? "tag-btn-active" : ""}`}
-                    onClick={() => handleTagToggle(tag)}
+                    key={tag.tag_id}
+                    className={`tag-btn ${form.tags.includes(tag.tag_id) ? "tag-btn-active" : ""}`}
+                    onClick={() => handleTagToggle(tag.tag_id)}
                   >
-                    {tag}
+                    {tag.name}
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Submit */}
-<button type="submit" className="btn-primary" disabled={loading}>
-  {loading ? "Saving..." : "Save Dream ✦"}
-</button>
+            <button type="submit" className="btn-primary" disabled={loading}>
+              {loading ? "Saving..." : "Save Dream ✦"}
+            </button>
 
           </form>
         </div>
+
         <Modal
-  open={modal.open}
-  type={modal.type}
-  message={modal.message}
-  onClose={handleModalClose}
-/>
+          open={modal.open}
+          type={modal.type}
+          message={modal.message}
+          onClose={handleModalClose}
+        />
       </main>
     </div>
   );

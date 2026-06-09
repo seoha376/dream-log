@@ -1,19 +1,25 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import logo from "../assets/logo.png";
-import { getDream, toggleFavorite } from "../api/dreamApi";
+import { getDream, toggleFavorite, generateSummary } from "../api/dreamApi";
+import { getTags } from "../api/tagApi";
 
 export default function DreamDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [dream, setDream] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [availableTags, setAvailableTags] = useState([]);
+  const [favLoading, setFavLoading] = useState(false);
+  const [summaryLoading, setSummaryLoading] = useState(false);
 
   useEffect(() => {
     const loadDream = async () => {
       try {
         const res = await getDream(id);
         setDream(res.data);
+        const tagsRes = await getTags();
+        setAvailableTags(Array.isArray(tagsRes.data) ? tagsRes.data : tagsRes.data.data || []);
       } catch (err) {
         console.error(err);
         setDream(null);
@@ -21,23 +27,37 @@ export default function DreamDetail() {
         setLoading(false);
       }
     };
-
-    
     loadDream();
   }, [id]);
 
   const handleToggleFavorite = async () => {
+    setFavLoading(true);
     try {
-      await toggleFavorite(id);
-      setDream((prev) => ({ ...prev, is_favorite: !prev.is_favorite }));
+      const res = await toggleFavorite(id);
+      const is_favorite = res.data?.is_favorite ?? !dream.is_favorite;
+      setDream((prev) => ({ ...prev, is_favorite }));
     } catch (err) {
       console.error(err);
+    } finally {
+      setFavLoading(false);
     }
   };
 
+  const handleSummary = async () => {
+    setSummaryLoading(true);
+    try {
+      const res = await generateSummary(id);
+      const ai_summary = res.data?.ai_summary;
+      setDream((prev) => ({ ...prev, ai_summary }));
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSummaryLoading(false);
+    }
+  };
 
   if (loading) {
-    return <div className="root">Loading...</div>;
+    return <div className="root"><div className="aurora" /><main className="dream-detail-main"><div className="dream-detail-card"><p>Loading...</p></div></main></div>;
   }
 
   if (!dream) {
@@ -61,41 +81,30 @@ export default function DreamDetail() {
 
   return (
     <div className="root">
-      {/* Starfield */}
       <div className="starfield" aria-hidden="true">
         {Array.from({ length: 40 }).map((_, i) => (
-          <span
-            key={i}
-            className="star"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              width: Math.random() * 2.5 + 0.5,
-              height: Math.random() * 2.5 + 0.5,
-              animationDelay: `${Math.random() * 4}s`,
-              animationDuration: `${Math.random() * 3 + 2}s`,
-            }}
-          />
+          <span key={i} className="star" style={{
+            left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%`,
+            width: Math.random() * 2.5 + 0.5, height: Math.random() * 2.5 + 0.5,
+            animationDelay: `${Math.random() * 4}s`, animationDuration: `${Math.random() * 3 + 2}s`,
+          }} />
         ))}
       </div>
       <div className="aurora" aria-hidden="true" />
 
-      {/* Navbar */}
       <nav className="nav">
         <Link to="/dashboard" className="nav-logo">
           <img src={logo} alt="Dream Log" className="nav-logo-img" />
         </Link>
         <div className="nav-actions">
-          <button className="btn-ghost" onClick={() => navigate(-1)}>← Back</button>
+          <button className="btn-ghost" onClick={() => navigate("/dreams")}>← Back</button>
           <button className="btn-orange" onClick={() => navigate(`/dream/${id}/edit`)}>Edit</button>
         </div>
       </nav>
 
-      {/* Main */}
       <main className="dream-detail-main">
         <div className="dream-detail-card">
 
-          {/* Header */}
           <div className="dream-detail-header">
             <div>
               <h1 className="dream-detail-title">{dream.title}</h1>
@@ -104,35 +113,51 @@ export default function DreamDetail() {
             <button
               className={`dream-detail-fav ${dream.is_favorite ? "fav-active" : ""}`}
               onClick={handleToggleFavorite}
+              disabled={favLoading}
+              style={{
+                cursor: "pointer", background: "none",
+                border: `1px solid ${dream.is_favorite ? "rgba(251,191,36,0.3)" : "rgba(255,255,255,0.25)"}`,
+                borderRadius: "20px", padding: "6px 12px",
+                color: dream.is_favorite ? "#fbbf24" : "#e8e4f8", font: "inherit",
+              }}
             >
-              {dream.is_favorite ? "★ Favorited" : "☆ Not favorited"}
+              {dream.is_favorite ? "★ Favorited" : "☆ Add to favorites"}
             </button>
           </div>
 
-          {/* Tags */}
           {dream.tags?.length > 0 && (
             <div className="dream-detail-tags">
-              {dream.tags.map((tag) => (
-                <span key={tag} className="dream-detail-tag">#{tag}</span>
-              ))}
+              {dream.tags.map((tagId) => {
+                const tag = availableTags.find((t) => t.tag_id === tagId);
+                return <span key={tagId} className="dream-detail-tag">#{tag?.name || tagId}</span>;
+              })}
             </div>
           )}
 
-          {/* Divider */}
           <div className="dream-detail-divider" />
 
-          {/* Content */}
           <div className="field-group">
             <label className="field-label">DREAM CONTENT</label>
             <p className="dream-detail-content">{dream.content}</p>
           </div>
 
-          {/* AI Summary */}
-          {dream.ai_summary && (
+          {dream.ai_summary ? (
             <div className="dream-detail-summary">
               <div className="dream-detail-summary-label">✦ AI Summary</div>
               <p className="dream-detail-summary-text">{dream.ai_summary}</p>
+              <button
+                className="dreamlist-action-btn"
+                onClick={handleSummary}
+                disabled={summaryLoading}
+                style={{ marginTop: 12 }}
+              >
+                {summaryLoading ? "Regenerating..." : "↺ Regenerate"}
+              </button>
             </div>
+          ) : (
+            <button className="btn-primary" onClick={handleSummary} disabled={summaryLoading}>
+              {summaryLoading ? "Generating..." : "✦ Generate AI Summary"}
+            </button>
           )}
 
         </div>

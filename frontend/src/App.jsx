@@ -9,10 +9,7 @@ import DreamDetail from "./pages/DreamDetail";
 import DreamCreate from "./pages/DreamCreate";
 import DreamEdit from "./pages/DreamEdit";
 import DreamList from "./pages/DreamList";
-import Favorites from "./pages/Favorites";
-
-
-
+import Favorites from "./pages/Favorites";  // ← 추가
 
 const stars = Array.from({ length: 60 }, (_, i) => ({
   id: i,
@@ -84,7 +81,7 @@ function Home() {
           The smartest way to capture, explore, and understand<br />
           the hidden patterns of your sleeping mind.
         </p>
-          <img src={logo} alt="Dream Log"  />
+        <img src={logo} alt="Dream Log" />
 
         <div className="card">
           <div className="card-header">
@@ -122,12 +119,11 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/dream/:id" element={<DreamDetail />} />
         <Route path="/dream/create" element={<DreamCreate />} />
-        <Route path="/dream/:id/edit" element={<DreamEdit />} />        
+        <Route path="/dream/:id" element={<DreamDetail />} />
+        <Route path="/dream/:id/edit" element={<DreamEdit />} />
         <Route path="/dreams" element={<DreamList />} />
         <Route path="/favorites" element={<Favorites />} />
-        
       </Routes>
     </BrowserRouter>
   );

@@ -5,6 +5,7 @@ const authMiddleware = require("../middleware/authMiddleware");
 const dreamController = require("../controllers/dreamController");
 
 router.use(authMiddleware);
+
 /**
  * @swagger
  * /api/dreams:
@@ -37,7 +38,6 @@ router.use(authMiddleware);
  *         description: Failed to get dreams
  */
 router.get("/", dreamController.getDreams);
-
 
 /**
  * @swagger
@@ -102,7 +102,6 @@ router.get("/:id", dreamController.getDream);
  */
 router.post("/", dreamController.createDream);
 
-
 /**
  * @swagger
  * /api/dreams/{id}:
@@ -139,7 +138,6 @@ router.post("/", dreamController.createDream);
  */
 router.patch("/:id", dreamController.updateDream);
 
-
 /**
  * @swagger
  * /api/dreams/{id}:
@@ -162,7 +160,6 @@ router.patch("/:id", dreamController.updateDream);
  */
 router.delete("/:id", dreamController.deleteDream);
 
-
 /**
  * @swagger
  * /api/dreams/{id}/favorite:
@@ -184,5 +181,33 @@ router.delete("/:id", dreamController.deleteDream);
  *         description: Dream not found
  */
 router.patch("/:id/favorite", dreamController.toggleFavorite);
+
+/**
+ * @swagger
+ * /api/dreams/{id}/summary:
+ *   post:
+ *     summary: Generate AI summary for a dream
+ *     tags:
+ *       - Dreams
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Dream ID
+ *     responses:
+ *       200:
+ *         description: Summary generated successfully
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Dream not found
+ *       500:
+ *         description: Failed to summarize dream
+ */
+router.post("/:id/summary", dreamController.summarizeDream);
 
 module.exports = router;
