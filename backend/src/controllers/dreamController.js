@@ -1,5 +1,6 @@
 const Dream = require("../models/Dream");
 const DreamTag = require("../models/DreamTag");
+const aiService = require("../services/aiService");
 
 exports.getDreams = async (req, res) => {
   try {
@@ -216,6 +217,38 @@ exports.toggleFavorite = async (req, res) => {
     res.status(500).json({
       code: "TOGGLE_FAVORITE_FAILED",
       message: "Failed to toggle favorite"
+    });
+  }
+};
+
+
+exports.summarizeDream = async (req, res) => {
+  try {
+    const userId = req.user.user_id;
+    const dreamId = req.params.id;
+
+    const dream = await Dream.findDreamByIdAndUserId(dreamId, userId);
+
+    if (!dream) {
+      return res.status(404).json({
+        code: "DREAM_NOT_FOUND",
+        message: "Dream not found"
+      });
+    }
+
+    const summary = await aiService.generateDreamSummary(dream.content);
+
+    await Dream.updateDreamSummary(dreamId, userId, summary);
+
+    return res.status(200).json({
+      dream_id: Number(dreamId),
+      ai_summary: summary
+    });
+  } catch (err) {
+    console.error("SUMMARIZE DREAM ERROR:", err.message);
+    return res.status(500).json({
+      code: "SUMMARY_FAILED",
+      message: "Failed to summarize dream"
     });
   }
 };
