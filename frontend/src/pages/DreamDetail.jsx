@@ -1,63 +1,43 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import logo from "../assets/logo.png";
-import { getDream, toggleFavorite, generateSummary } from "../api/dreamApi";
+import { getDream, toggleFavorite } from "../api/dreamApi";
 
 export default function DreamDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [dream, setDream] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [favLoading, setFavLoading] = useState(false);
-  const [summaryLoading, setSummaryLoading] = useState(false);
 
   useEffect(() => {
-    getDream(id)
-      .then((res) => setDream(res.data.data.dream))
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
+    const loadDream = async () => {
+      try {
+        const res = await getDream(id);
+        setDream(res.data);
+      } catch (err) {
+        console.error(err);
+        setDream(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    
+    loadDream();
   }, [id]);
 
-  const handleFavorite = async () => {
-    setFavLoading(true);
+  const handleToggleFavorite = async () => {
     try {
-      const res = await toggleFavorite(id);
-      setDream((prev) => ({ ...prev, is_favorite: res.data.data.is_favorite }));
+      await toggleFavorite(id);
+      setDream((prev) => ({ ...prev, is_favorite: !prev.is_favorite }));
     } catch (err) {
       console.error(err);
-    } finally {
-      setFavLoading(false);
     }
   };
 
-  const handleSummary = async () => {
-    setSummaryLoading(true);
-    try {
-      const res = await generateSummary(id);
-      setDream((prev) => ({ ...prev, ai_summary: res.data.data.ai_summary }));
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setSummaryLoading(false);
-    }
-  };
 
   if (loading) {
-    return (
-      <div className="root">
-        <div className="aurora" aria-hidden="true" />
-        <nav className="nav">
-          <Link to="/dashboard" className="nav-logo">
-            <img src={logo} alt="Dream Log" className="nav-logo-img" />
-          </Link>
-        </nav>
-        <main className="dream-detail-main">
-          <div className="dream-detail-card">
-            <p className="dream-detail-empty">Loading...</p>
-          </div>
-        </main>
-      </div>
-    );
+    return <div className="root">Loading...</div>;
   }
 
   if (!dream) {
@@ -81,6 +61,7 @@ export default function DreamDetail() {
 
   return (
     <div className="root">
+      {/* Starfield */}
       <div className="starfield" aria-hidden="true">
         {Array.from({ length: 40 }).map((_, i) => (
           <span
@@ -99,6 +80,7 @@ export default function DreamDetail() {
       </div>
       <div className="aurora" aria-hidden="true" />
 
+      {/* Navbar */}
       <nav className="nav">
         <Link to="/dashboard" className="nav-logo">
           <img src={logo} alt="Dream Log" className="nav-logo-img" />
@@ -109,9 +91,11 @@ export default function DreamDetail() {
         </div>
       </nav>
 
+      {/* Main */}
       <main className="dream-detail-main">
         <div className="dream-detail-card">
 
+          {/* Header */}
           <div className="dream-detail-header">
             <div>
               <h1 className="dream-detail-title">{dream.title}</h1>
@@ -119,22 +103,13 @@ export default function DreamDetail() {
             </div>
             <button
               className={`dream-detail-fav ${dream.is_favorite ? "fav-active" : ""}`}
-              onClick={handleFavorite}
-              disabled={favLoading}
-              style={{
-                cursor: "pointer",
-                background: "none",
-                border: `1px solid ${dream.is_favorite ? "rgba(251,191,36,0.3)" : "rgba(255,255,255,0.25)"}`,
-                borderRadius: "20px",
-                padding: "6px 12px",
-                color: dream.is_favorite ? "#fbbf24" : "#e8e4f8",
-                font: "inherit",
-              }}
+              onClick={handleToggleFavorite}
             >
-              {dream.is_favorite ? "★ Favorited" : "☆ Add to favorites"}
+              {dream.is_favorite ? "★ Favorited" : "☆ Not favorited"}
             </button>
           </div>
 
+          {/* Tags */}
           {dream.tags?.length > 0 && (
             <div className="dream-detail-tags">
               {dream.tags.map((tag) => (
@@ -143,34 +118,21 @@ export default function DreamDetail() {
             </div>
           )}
 
+          {/* Divider */}
           <div className="dream-detail-divider" />
 
+          {/* Content */}
           <div className="field-group">
             <label className="field-label">DREAM CONTENT</label>
             <p className="dream-detail-content">{dream.content}</p>
           </div>
 
-          {dream.ai_summary ? (
+          {/* AI Summary */}
+          {dream.ai_summary && (
             <div className="dream-detail-summary">
               <div className="dream-detail-summary-label">✦ AI Summary</div>
               <p className="dream-detail-summary-text">{dream.ai_summary}</p>
-              <button
-                className="dreamlist-action-btn"
-                onClick={handleSummary}
-                disabled={summaryLoading}
-                style={{ marginTop: 12 }}
-              >
-                {summaryLoading ? "Regenerating..." : "↺ Regenerate"}
-              </button>
             </div>
-          ) : (
-            <button
-              className="btn-primary"
-              onClick={handleSummary}
-              disabled={summaryLoading}
-            >
-              {summaryLoading ? "Generating..." : "✦ Generate AI Summary"}
-            </button>
           )}
 
         </div>

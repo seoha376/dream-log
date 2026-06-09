@@ -1,19 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
+import { getDreams } from "../api/dreamApi";
 
-const MONTH_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-const DAY_NAMES = ["Su","Mo","Tu","We","Th","Fr","Sa"];
+const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const DAY_NAMES = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 const YEARS = Array.from({ length: 10 }, (_, i) => 2020 + i);
 
-// 꿈이 기록된 날짜 예시 데이터
-const DREAM_DATES = { "2025-8-9": true, "2025-8-13": true, "2025-8-20": true };
-
-const recentDreams = [
-  { id: 1, title: "Dream 1", date: "2025.08.13", preview: "I was flying over a misty city..." },
-  { id: 2, title: "Dream 2", date: "2025.08.09", preview: "A vast ocean with glowing waves..." },
-  { id: 3, title: "Dream 3", date: "2025.08.01", preview: "Running through an endless forest..." },
-];
 
 function getDaysInMonth(year, month) {
   return new Date(year, month + 1, 0).getDate();
@@ -28,6 +21,27 @@ export default function Dashboard() {
   const [selectedMonth, setSelectedMonth] = useState(today.getMonth());
   const [selectedYear, setSelectedYear] = useState(today.getFullYear());
   const [selectedDay, setSelectedDay] = useState(today.getDate());
+  const [recentDreams, setRecentDreams] = useState([]);
+  const [dreamDates, setDreamDates] = useState({});
+
+  useEffect(() => {
+    const loadDreams = async () => {
+      try {
+        const res = await getDreams();
+        const dreams = res.data;
+        setRecentDreams(dreams.slice(0, 3));
+        const dates = {};
+        dreams.forEach((d) => {
+          const [year, month, day] = d.dream_date.split("-");
+          dates[`${year}-${Number(month) - 1}-${Number(day)}`] = true;
+        });
+        setDreamDates(dates);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    loadDreams();
+  }, []);
 
   const daysInMonth = getDaysInMonth(selectedYear, selectedMonth);
   const firstDay = getFirstDayOfMonth(selectedYear, selectedMonth);
@@ -60,7 +74,7 @@ export default function Dashboard() {
     selectedMonth === today.getMonth() &&
     selectedYear === today.getFullYear();
 
-  const hasDream = (day) => DREAM_DATES[`${selectedYear}-${selectedMonth}-${day}`];
+  const hasDream = (day) => dreamDates[`${selectedYear}-${selectedMonth}-${day}`];
 
   return (
     <div className="root">
@@ -157,15 +171,15 @@ export default function Dashboard() {
           <div className="recent-list">
             {recentDreams.map((dream) => (
               <div
-                key={dream.id}
+                key={dream.dream_id}
                 className="dream-item"
-                onClick={() => navigate(`/dream/${dream.id}`)}
+                onClick={() => navigate(`/dream/${dream.dream_id}`)}
               >
                 <div className="dream-item-top">
                   <span className="dream-item-title">{dream.title}</span>
-                  <span className="dream-item-date">{dream.date}</span>
+                  <span className="dream-item-date">{dream.dream_date}</span>
                 </div>
-                <p className="dream-item-preview">{dream.preview}</p>
+                <p className="dream-item-preview">{dream.ai_summary || dream.content?.slice(0, 50)}</p>
               </div>
             ))}
           </div>

@@ -1,216 +1,222 @@
-const db = require("../db/database");
-const { success, error } = require("../utils/response");
+const Dream = require("../models/Dream");
 
-// 꿈 목록 조회
-exports.getDreams = (req, res) => {
-  const user_id = req.user.user_id;
-  const { date, tag, favorite } = req.query;
+exports.getDreams = async (req, res) => {
+  try {
+    const userId = req.user.user_id;
+    const { tag, keyword } = req.query;
 
-  let query = `
-    SELECT d.*, GROUP_CONCAT(t.name) as tags
-    FROM dreams d
-    LEFT JOIN dream_tags dt ON d.dream_id = dt.dream_id
-    LEFT JOIN tags t ON dt.tag_id = t.tag_id
-    WHERE d.user_id = ?
-  `;
-  const params = [user_id];
+    let dreams;
 
-  if (date) { query += " AND d.dream_date = ?"; params.push(date); }
-  if (favorite === "true") { query += " AND d.is_favorite = 1"; }
-  if (tag) {
-    query += ` AND d.dream_id IN (
-      SELECT dt2.dream_id FROM dream_tags dt2
-      JOIN tags t2 ON dt2.tag_id = t2.tag_id
-      WHERE t2.name = ?
-    )`;
-    params.push(tag);
-  }
-  query += " GROUP BY d.dream_id ORDER BY d.dream_date DESC";
-
-  db.all(query, params, (err, rows) => {
-    if (err) return error(res, 500, "DB_ERROR", err.message);
-    const dreams = rows.map((d) => ({
-      ...d,
-      tags: d.tags ? d.tags.split(",") : [],
-      is_favorite: d.is_favorite === 1,
-    }));
-    return success(res, 200, { dreams });
-  });
-};
-
-// 꿈 상세 조회
-exports.getDream = (req, res) => {
-  const { id } = req.params;
-  const user_id = req.user.user_id;
-
-  db.get(`
-    SELECT d.*, GROUP_CONCAT(t.name) as tags
-    FROM dreams d
-    LEFT JOIN dream_tags dt ON d.dream_id = dt.dream_id
-    LEFT JOIN tags t ON dt.tag_id = t.tag_id
-    WHERE d.dream_id = ? AND d.user_id = ?
-    GROUP BY d.dream_id
-  `, [id, user_id], (err, row) => {
-    if (err) return error(res, 500, "DB_ERROR", err.message);
-    if (!row) return error(res, 404, "DREAM_NOT_FOUND", "Dream not found");
-    return success(res, 200, {
-      dream: { ...row, tags: row.tags ? row.tags.split(",") : [], is_favorite: row.is_favorite === 1 }
-    });
-  });
-};
-
-// 꿈 생성
-exports.createDream = (req, res) => {
-  const { dream_date, title, content, tags = [] } = req.body;
-  const user_id = req.user.user_id;
-
-  if (!dream_date || !title || !content) {
-    return error(res, 400, "VALIDATION_ERROR", "dream_date, title, content are required");
-  }
-
-  db.run(
-    "INSERT INTO dreams (user_id, dream_date, title, content) VALUES (?, ?, ?, ?)",
-    [user_id, dream_date, title, content],
-    function (err) {
-      if (err) return error(res, 500, "DB_ERROR", err.message);
-      const dream_id = this.lastID;
-
-      if (tags.length === 0) {
-        return success(res, 201, { dream: { dream_id, dream_date, title, content, tags: [], is_favorite: false } });
-      }
-
-      // 태그 연결
-      const placeholders = tags.map(() => "?").join(",");
-      db.all(
-        `SELECT tag_id, name FROM tags WHERE name IN (${placeholders})`,
-        tags,
-        (err, tagRows) => {
-          if (err) return error(res, 500, "DB_ERROR", err.message);
-
-          const insertStmt = tagRows.map(() => "(?, ?)").join(",");
-          const insertParams = tagRows.flatMap((t) => [dream_id, t.tag_id]);
-
-          db.run(
-            `INSERT OR IGNORE INTO dream_tags (dream_id, tag_id) VALUES ${insertStmt}`,
-            insertParams,
-            (err) => {
-              if (err) return error(res, 500, "DB_ERROR", err.message);
-              return success(res, 201, {
-                dream: { dream_id, dream_date, title, content, tags: tagRows.map((t) => t.name), is_favorite: false }
-              });
-            }
-          );
-        }
-      );
+    if (tag) {
+      dreams = await Dream.findDreamsByUserIdAndTagId(userId, tag);
+    } else if (keyword) {
+      dreams = await Dream.findDreamsByUserIdAndKeyword(userId, keyword);
+    } else {
+      dreams = await Dream.findDreamsByUserId(userId);
     }
-  );
+    res.json(dreams);
+  } catch (err) {
+    console.error("GET DREAMS ERROR:", err.message);
+    res.status(500).json({
+      code: "GET_DREAMS_FAILED",
+      message: "Failed to get dreams"
+    });
+  }
 };
 
-// 꿈 수정
-exports.updateDream = (req, res) => {
-  const { id } = req.params;
-  const { title, content, dream_date, tags } = req.body;
-  const user_id = req.user.user_id;
+exports.getDream = async (req, res) => {
+  try {
+    const userId = req.user.user_id;
+    const dreamId = req.params.id;
 
-  db.get("SELECT * FROM dreams WHERE dream_id = ? AND user_id = ?", [id, user_id], (err, row) => {
-    if (err) return error(res, 500, "DB_ERROR", err.message);
-    if (!row) return error(res, 404, "DREAM_NOT_FOUND", "Dream not found");
+    const dream = await Dream.findDreamByIdAndUserId(dreamId, userId);
 
-    db.run(
-      "UPDATE dreams SET title=?, content=?, dream_date=?, updated_at=CURRENT_TIMESTAMP WHERE dream_id=?",
-      [title ?? row.title, content ?? row.content, dream_date ?? row.dream_date, id],
-      (err) => {
-        if (err) return error(res, 500, "DB_ERROR", err.message);
+    if (!dream) {
+      return res.status(404).json({
+        code: "DREAM_NOT_FOUND",
+        message: "Dream not found"
+      });
+    }
 
-        if (!tags) return success(res, 200, { message: "Dream updated successfully" });
+    res.json(dream);
+  } catch (err) {
+    console.error("GET DREAM ERROR:", err.message);
+    res.status(500).json({
+      code: "GET_DREAM_FAILED",
+      message: "Failed to get dream"
+    });
+  }
+};
 
-        db.run("DELETE FROM dream_tags WHERE dream_id = ?", [id], (err) => {
-          if (err) return error(res, 500, "DB_ERROR", err.message);
-          if (tags.length === 0) return success(res, 200, { message: "Dream updated successfully" });
+exports.createDream = async (req, res) => {
+  try {
+    const userId = req.user.user_id;
+    const { title, content, dream_date, tags = [] } = req.body;
 
-          const placeholders = tags.map(() => "?").join(",");
-          db.all(`SELECT tag_id, name FROM tags WHERE name IN (${placeholders})`, tags, (err, tagRows) => {
-            if (err) return error(res, 500, "DB_ERROR", err.message);
-            const insertStmt = tagRows.map(() => "(?, ?)").join(",");
-            const insertParams = tagRows.flatMap((t) => [id, t.tag_id]);
-            db.run(`INSERT OR IGNORE INTO dream_tags (dream_id, tag_id) VALUES ${insertStmt}`, insertParams, (err) => {
-              if (err) return error(res, 500, "DB_ERROR", err.message);
-              return success(res, 200, { message: "Dream updated successfully" });
-            });
-          });
+    if (!title || !content || !dream_date) {
+      return res.status(400).json({
+        code: "MISSING_REQUIRED_FIELDS",
+        message: "title, content, dream_date are required"
+      });
+    }
+
+    if (!Array.isArray(tags)) {
+      return res.status(400).json({
+        code: "INVALID_TAGS",
+        message: "tags must be an array"
+      });
+    }
+
+    const result = await Dream.createDream(userId, dream_date, title, content);
+    const dreamId = result.id;
+
+    for (const tagId of tags) {
+      const tag = await Dream.findTagById(tagId);
+
+      if (!tag) {
+        return res.status(400).json({
+          code: "INVALID_TAG_ID",
+          message: `Invalid tag_id: ${tagId}`
         });
       }
-    );
-  });
-};
 
-// 꿈 삭제
-exports.deleteDream = (req, res) => {
-  const { id } = req.params;
-  const user_id = req.user.user_id;
+      await Dream.addTagToDream(dreamId, tagId);
+    }
 
-  db.get("SELECT * FROM dreams WHERE dream_id = ? AND user_id = ?", [id, user_id], (err, row) => {
-    if (err) return error(res, 500, "DB_ERROR", err.message);
-    if (!row) return error(res, 404, "DREAM_NOT_FOUND", "Dream not found");
-
-    db.run("DELETE FROM dream_tags WHERE dream_id = ?", [id], (err) => {
-      if (err) return error(res, 500, "DB_ERROR", err.message);
-      db.run("DELETE FROM dreams WHERE dream_id = ?", [id], (err) => {
-        if (err) return error(res, 500, "DB_ERROR", err.message);
-        return success(res, 200, { message: "Dream deleted successfully" });
-      });
+    res.status(201).json({
+      dream_id: dreamId,
+      user_id: userId,
+      title,
+      content,
+      dream_date,
+      tags
     });
-  });
+  } catch (err) {
+    console.error("CREATE DREAM ERROR:", err.message);
+    res.status(500).json({
+      code: "CREATE_DREAM_FAILED",
+      message: "Failed to create dream"
+    });
+  }
 };
 
-const { generateDreamSummary } = require("../services/aiService");
 
-exports.generateSummary = (req, res) => {
-  const { id } = req.params;
-  const user_id = req.user.user_id;
 
-  db.get(
-    "SELECT * FROM dreams WHERE dream_id = ? AND user_id = ?",
-    [id, user_id],
-    async (err, dream) => {
-      if (err) return error(res, 500, "DB_ERROR", err.message);
-      if (!dream) return error(res, 404, "DREAM_NOT_FOUND", "Dream not found");
 
-      try {
-        const ai_summary = await generateDreamSummary(dream.content);
+exports.updateDream = async (req, res) => {
 
-        db.run(
-          "UPDATE dreams SET ai_summary = ?, updated_at = CURRENT_TIMESTAMP WHERE dream_id = ?",
-          [ai_summary, id],
-          (err) => {
-            if (err) return error(res, 500, "DB_ERROR", err.message);
-            return success(res, 200, {
-              message: "AI summary generated successfully",
-              ai_summary,
-            });
-          }
-        );
-      } catch (err) {
-        console.error("Summary error:", err);
-        return error(res, 500, "AI_SUMMARY_FAILED", "Failed to generate AI summary.");
+  try {
+    const userId = req.user.user_id;
+    const dreamId = req.params.id;
+    const { title, content, dream_date, tags } = req.body;
+
+    const existingDream = await Dream.findDreamByIdAndUserId(dreamId, userId);
+
+    if (!existingDream) {
+      return res.status(404).json({
+        code: "DREAM_NOT_FOUND",
+        message: "Dream not found"
+      });
+    }
+
+    const nextTitle = title ?? existingDream.title;
+    const nextContent = content ?? existingDream.content;
+    const nextDate = dream_date ?? existingDream.dream_date;
+
+    await Dream.updateDream
+    (dreamId, userId, nextTitle, nextContent, nextDate);
+
+    if (Array.isArray(tags)) {
+      await Dream.removeTagsFromDream(dreamId);
+
+      for (const tagId of tags) {
+        const tag = await Dream.findTagById(tagId);
+      
+        if (!tag) {
+          return res.status(400).json({
+            code: "INVALID_TAG_ID",
+            message: `Invalid tag_id: ${tagId}`
+          });
+        }
+      
+        await Dream.addTagToDream(dreamId, tagId);
       }
     }
-  );
+
+    res.json({
+      dream_id: Number(dreamId),
+      user_id: userId,
+      title: nextTitle,
+      content: nextContent,
+      dream_date: nextDate,
+      is_favorite: existingDream.is_favorite
+    });
+  } catch (err) {
+    console.error("UPDATE DREAM ERROR:", err.message);
+    res.status(500).json({
+      code: "UPDATE_DREAM_FAILED",
+      message: "Failed to update dream"
+    });
+  }
 };
 
-// 즐겨찾기 토글
-exports.toggleFavorite = (req, res) => {
-  const { id } = req.params;
-  const user_id = req.user.user_id;
 
-  db.get("SELECT * FROM dreams WHERE dream_id = ? AND user_id = ?", [id, user_id], (err, row) => {
-    if (err) return error(res, 500, "DB_ERROR", err.message);
-    if (!row) return error(res, 404, "DREAM_NOT_FOUND", "Dream not found");
 
-    const newVal = row.is_favorite === 1 ? 0 : 1;
-    db.run("UPDATE dreams SET is_favorite = ? WHERE dream_id = ?", [newVal, id], (err) => {
-      if (err) return error(res, 500, "DB_ERROR", err.message);
-      return success(res, 200, { message: "Favorite updated", is_favorite: newVal === 1 });
+
+exports.deleteDream = async (req, res) => {
+  try {
+    const userId = req.user.user_id;
+    const dreamId = req.params.id;
+
+    const result = await Dream.deleteDream(dreamId, userId);
+
+    if (result.changes === 0) {
+      return res.status(404).json({
+        code: "DREAM_NOT_FOUND",
+        message: "Dream not found"
+      });
+    }
+
+    res.json({
+      message: "Dream deleted"
     });
-  });
+  } catch (err) {
+    console.error("DELETE DREAM ERROR:", err.message);
+    res.status(500).json({
+      code: "DELETE_DREAM_FAILED",
+      message: "Failed to delete dream"
+    });
+  }
+};
+
+exports.toggleFavorite = async (req, res) => {
+  try {
+    const userId = req.user.user_id;
+    const dreamId = req.params.id;
+
+    const dream = await Dream.findDreamByIdAndUserId(dreamId, userId);
+
+    if (!dream) {
+      return res.status(404).json({
+        code: "DREAM_NOT_FOUND",
+        message: "Dream not found"
+      });
+    }
+
+    const nextFavorite = dream.is_favorite ? 0 : 1;
+
+    await Dream.updateFavorite(dreamId, userId, nextFavorite);
+
+    res.json({
+      dream_id: Number(dreamId),
+      user_id: Number(userId),
+      is_favorite: nextFavorite
+    });
+  } catch (err) {
+    console.error("TOGGLE FAVORITE ERROR:", err.message);
+    res.status(500).json({
+      code: "TOGGLE_FAVORITE_FAILED",
+      message: "Failed to toggle favorite"
+    });
+  }
 };

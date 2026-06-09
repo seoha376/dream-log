@@ -7,18 +7,6 @@ const findAllTags = async () => {
   `);
 };
 
-const findTagByName = async (name) => {
-  return await get(
-    `
-    SELECT *
-    FROM tags
-    WHERE name=?
-    `,
-    [name]
-  );
-};
-
 module.exports = {
-  findAllTags,
-  findTagByName
+  findAllTags
 };

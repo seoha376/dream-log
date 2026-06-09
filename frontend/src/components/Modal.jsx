@@ -1,7 +1,8 @@
-export default function Modal({ open, type, message, onClose }) {
+export default function Modal({ open, type, message, onClose, onConfirm }) {
   if (!open) return null;
 
   const isSuccess = type === "success";
+  const isConfirm = type === "confirm";
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -23,15 +24,28 @@ export default function Modal({ open, type, message, onClose }) {
           )}
         </div>
 
-        <h3 className="modal-heading">{isSuccess ? "Success" : "Error"}</h3>
+        <h3 className="modal-heading">
+          {isSuccess ? "Success!" : isConfirm ? "Confirm" : "Error"}
+        </h3>
         <p className="modal-message">{message}</p>
 
-        <button
-          className={`modal-btn ${isSuccess ? "modal-btn-success" : "modal-btn-error"}`}
-          onClick={onClose}
-        >
-          Ok
-        </button>
+        {isConfirm ? (
+          <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
+            <button className="modal-btn modal-btn-error" onClick={onConfirm}>
+              Delete
+            </button>
+            <button className="modal-btn modal-btn-success" onClick={onClose}>
+              Cancel
+            </button>
+          </div>
+        ) : (
+          <button
+            className={`modal-btn ${isSuccess ? "modal-btn-success" : "modal-btn-error"}`}
+            onClick={onClose}
+          >
+            Confirm
+          </button>
+        )}
       </div>
     </div>
   );

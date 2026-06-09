@@ -14,8 +14,11 @@ export const registerUser = async ({ name, email, password }) => {
 };
 
 export const loginUser = async ({ id, password }) => {
-  const response = await API.post("/api/auth/login", { email: id, password });
-  localStorage.setItem("token", response.data.data.token);  // ← 저장
+  const response = await API.post("/api/auth/login", {
+    email: id,
+    password
+  });
+  localStorage.setItem("token", response.data.data.token);
   return response.data;
 };
 
