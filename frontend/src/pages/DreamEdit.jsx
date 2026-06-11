@@ -4,7 +4,7 @@ import logo from "../assets/logo.png";
 import { getTags } from "../api/tagApi";
 import { getDream, updateDream } from "../api/dreamApi";
 
-export default function DreamEdit() {
+export default function DreamEdit() { // 꿈 수정 페이지
   const { id } = useParams();
   const navigate = useNavigate();
   const [dream, setDream] = useState(null);
@@ -23,10 +23,10 @@ export default function DreamEdit() {
   useEffect(() => {
     async function loadDream() {
       try {
-        const response = await getDream(id);
+        const response = await getDream(id); // 특정 꿈 내용 가져오고
         const dreamData = response.data;
 
-        const tagsRes = await getTags();
+        const tagsRes = await getTags(); // 태그 가져오고
         setAvailableTags(Array.isArray(tagsRes.data) ? tagsRes.data : tagsRes.data.data || []);
 
         setForm({
@@ -116,7 +116,7 @@ export default function DreamEdit() {
     e.preventDefault();
 
     try {
-      await updateDream(id, {
+      await updateDream(id, { // 출력값 : 꿈 내용 업데이트 api 호출
         title: form.title,
         content: form.content,
         dream_date: form.dream_date,

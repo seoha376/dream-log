@@ -5,7 +5,7 @@ import { getDreams, deleteDream } from "../api/dreamApi";
 import { getTags } from "../api/tagApi";
 import Modal from "../components/Modal";
 
-export default function DreamList() {
+export default function DreamList() { // 전체 꿈 목록 조회 페이지
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [selectedTags, setSelectedTags] = useState([]);
@@ -16,7 +16,7 @@ export default function DreamList() {
   const [deleteModal, setDeleteModal] = useState({ open: false, dreamId: null });
   const [availableTags, setAvailableTags] = useState([]);
 
-  const loadDreams = async () => {
+  const loadDreams = async () => { // 꿈 목록 불러오고,
     setLoading(true);
     setErrorMsg(null);
     try {
@@ -50,12 +50,17 @@ export default function DreamList() {
     );
   };
 
+  // 키워드 + 태그 필터링
+  // 현재 프론트엔드에서만 처리되고 있다.
+  // 만약 꿈 기록이 많아지면 백엔드 검색 API로 옮기는 것이 적절.
   const filtered = dreams.filter((dream) => {
     const matchSearch =
+    // 키워드 검색 (제목, 내용)
       search === "" ||
       dream.title?.toLowerCase().includes(search.toLowerCase()) ||
       dream.content?.toLowerCase().includes(search.toLowerCase());
     const matchTags =
+    // 태그 검색
       selectedTags.length === 0 ||
       selectedTags.every((tagId) => dream.tags?.includes(tagId));
     return matchSearch && matchTags;
@@ -65,7 +70,7 @@ export default function DreamList() {
 
   const confirmDelete = async () => {
     try {
-      await deleteDream(deleteModal.dreamId);
+      await deleteDream(deleteModal.dreamId); // 꿈 삭제도 하고.
       setDeleteModal({ open: false, dreamId: null });
       loadDreams();
     } catch (err) {

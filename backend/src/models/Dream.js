@@ -1,7 +1,7 @@
 const { run, get, all } = require("../db/dbHelper");
 
-const createDream = async (user_id,dream_date,title,content) => {
-  return await run(
+const createDream = async (user_id,dream_date,title,content) => { // 입력값
+  return await run( // SQL문으로 DB와 대화.
     `
     INSERT INTO dreams
     (user_id,dream_date,title,content)

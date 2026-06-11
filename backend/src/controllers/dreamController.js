@@ -50,7 +50,7 @@ exports.getDream = async (req, res) => {
 
 exports.createDream = async (req, res) => {
   try {
-    const userId = req.user.user_id;
+    const userId = req.user.user_id; // 입력값
     const { title, content, dream_date, tags = [] } = req.body;
 
     if (!title || !content || !dream_date) {
@@ -81,7 +81,7 @@ exports.createDream = async (req, res) => {
       await Dream.addTagToDream(dreamId, tagId);
     }
 
-    res.status(201).json({
+    res.status(201).json({ // 출력값(json 형태)
       dream_id: dreamId,
       user_id: userId,
       title,

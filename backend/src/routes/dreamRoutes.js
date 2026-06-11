@@ -37,7 +37,7 @@ router.use(authMiddleware);
  *       500:
  *         description: Failed to get dreams
  */
-router.get("/", dreamController.getDreams);
+router.get("/", dreamController.getDreams); // 어떤 URL이 어떤 controller 함수로 갈지 결정.
 
 /**
  * @swagger
@@ -100,6 +100,12 @@ router.get("/:id", dreamController.getDream);
  *       401:
  *         description: Authorization token is required
  */
+
+// frontend의 dreamCreate.jsx에서 createDream api를 호출함.
+// 그 post 요청은 frontend의 dreamApi를 통해, 이 곳 backend의 dreamRoutes로 오게 되었고
+// 이 라우터는 그 요청을 dreamController로 넘긴다.
+
+// front의 dreamApi와 back의 dreamRoutes가 딱 맞닿아있는 구조.
 router.post("/", dreamController.createDream);
 
 /**

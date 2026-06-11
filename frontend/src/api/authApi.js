@@ -18,7 +18,7 @@ export const loginUser = async ({ id, password }) => {
     email: id,
     password
   });
-  localStorage.setItem("token", response.data.data.token);
+  localStorage.setItem("token", response.data.data.token); // JWT 토큰 저장
   return response.data;
 };
 

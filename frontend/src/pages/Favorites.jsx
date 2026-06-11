@@ -4,7 +4,7 @@ import logo from "../assets/logo.png";
 import { getDreams, toggleFavorite } from "../api/dreamApi";
 import { getTags } from "../api/tagApi";
 
-export default function Favorites() {
+export default function Favorites() { // 즐겨찾기 페이지
   const navigate = useNavigate();
   const [dreams, setDreams] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -14,10 +14,11 @@ export default function Favorites() {
     const load = async () => {
       try {
         const [dreamsRes, tagsRes] = await Promise.all([
-          getDreams({ favorite: 1 }),
+          getDreams({ favorite: 1 }), // 즐겨찾기된 꿈만 보여주기
           getTags(),
         ]);
         const data = Array.isArray(dreamsRes.data) ? dreamsRes.data : dreamsRes.data?.dreams || [];
+        // favorite 1인 꿈만 보이게 하거나,
         const favDreams = data.filter((d) => d.is_favorite === 1 || d.is_favorite === true);
         setDreams(favDreams);
         setAvailableTags(Array.isArray(tagsRes.data) ? tagsRes.data : tagsRes.data.data || []);
@@ -32,7 +33,7 @@ export default function Favorites() {
 
   const handleUnfavorite = async (id) => {
     try {
-      await toggleFavorite(id);
+      await toggleFavorite(id); // favorite 여부 변경하는 api 호출
       setDreams((prev) => prev.filter((d) => d.dream_id !== id));
     } catch (err) {
       console.error(err);

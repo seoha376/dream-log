@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import "./App.css";
 import logo from "./assets/logo.png";
+// 기능에 맞는 page component 연결
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
@@ -66,6 +67,7 @@ function Home() {
           <img src={logo} alt="Dream Log" className="nav-logo-img" />
         </div>
         <div className="nav-actions">
+          {/* 버튼을 누르면 navigate함수 실행 -> login.jsx 같은 page component로 이동 */}
           <button className="btn-ghost" onClick={() => navigate("/login")}>Log In</button>
           <button className="btn-orange" onClick={() => navigate("/register")}>Sign Up</button>
         </div>

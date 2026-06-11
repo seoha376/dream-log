@@ -10,6 +10,9 @@ import { getTags } from "../api/tagApi";
 
 export default function DreamCreate() {
   const navigate = useNavigate();
+  // React frontend 에서
+  // 유저 요청을 받아들이는 첫번째 단계 -> dreamApi.js 의 axios -> backend api
+  // form 형태로, title, content, dream_date, tags 를 입력받음.
   const [form, setForm] = useState({
     title: "",
     content: "",
@@ -47,7 +50,7 @@ export default function DreamCreate() {
     e.preventDefault();
     setLoading(true);
     try {
-      await createDream(form);
+      await createDream(form); // 아까 받은 form 형태로 createDream api 호출.
       setModal({ open: true, type: "success", message: "Dream saved! 🌙" });
     } catch (err) {
       setModal({

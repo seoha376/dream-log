@@ -6,7 +6,7 @@ import { getDream, toggleFavorite, generateSummary } from "../api/dreamApi";
 import { getTags } from "../api/tagApi";
 
 export default function DreamDetail() {
-  const { id } = useParams();
+  const { id } = useParams(); // id 추출
   const navigate = useNavigate();
   const [dream, setDream] = useState(null);
   const [loading, setLoading] = useState(true);
